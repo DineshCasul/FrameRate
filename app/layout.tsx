@@ -1,7 +1,8 @@
 "use client"; // needed to use state and effects
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import Header from "./components/Header";
 
 export default function RootLayout({
@@ -20,7 +21,8 @@ export default function RootLayout({
         className={`font-mono min-h-screen flex flex-col bg-white text-black dark:bg-gray-100 dark:text-white`}
       >
         <Header isDark={isDark} toggleDark={() => setIsDark(!isDark)} />
-        <div className="mx-24 my-6 border p-6">{children}</div>
+        <div className="sm:mx-24 mx-4 my-6 border sm:p-6 p-2">{children}</div>
+        <SpeedInsights />
       </body>
     </html>
   );

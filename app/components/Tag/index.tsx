@@ -13,7 +13,7 @@ const Tag = ({ type }: Props) => {
           : type === "game"
           ? "text-green-500"
           : type === "series"
-          ? "text-red-500"
+          ? "text-red-700"
           : "text-black"
       }`}
     >

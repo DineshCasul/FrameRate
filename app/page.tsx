@@ -11,7 +11,7 @@ export default function Home() {
         <p className="mb-8 whitespace-pre-line">{homepageData.description}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
-          {cardData.map((data) => (
+          {cardData.slice(0, 6).map((data) => (
             <Link
               href={`/reviews/${data.id}`}
               key={data.id}
@@ -22,9 +22,15 @@ export default function Home() {
                 description={data.content}
                 title={data.title}
                 type={data.type}
+                backgroundUrl={data.backgroundUrl}
               />
             </Link>
           ))}
+        </div>
+        <div className="mt-12 ">
+          <Link className="hover:underline" href="/reviews">
+            -View All-
+          </Link>
         </div>
       </div>
     </div>
