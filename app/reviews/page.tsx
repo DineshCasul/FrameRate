@@ -16,9 +16,9 @@ const ReviewsPage = () => {
           crumbs={[{ label: "Home", href: "/" }, { label: "Reviews" }]}
         />
       </div>
-      <div className="flex w-full border-b my-4 sm:mt-0 mb-8 pb-4 justify-between">
-        <div>{`${filteredData?.length} / ${cardData?.length}`}</div>
-        <div className="pb-4 flex flex-row sm:flex-row sm:justify-end gap-4 sm:gap-4">
+      <div className="flex w-full border-b my-4 sm:mt-0 mb-8 pb-2 justify-between items-center">
+        <div className="italic">{`Total Results: ${filteredData?.length} / ${cardData?.length}`}</div>
+        <div className="flex flex-row sm:flex-row sm:justify-end gap-4 sm:gap-4">
           <div className="flex item-center gap-2">
             <FilterReviews data={cardData} setFilteredData={setFilteredData} />
           </div>
@@ -33,21 +33,27 @@ const ReviewsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 justify-items-center">
-        {filteredData.map((data) => (
-          <Link
-            href={`/reviews/${data.id}`}
-            key={data.id}
-            className="block w-full"
-          >
-            <Card
-              rating={data.rating}
-              description={data.content}
-              title={data.title}
-              type={data.type}
-              backgroundUrl={data.backgroundUrl}
-            />
-          </Link>
-        ))}
+        {filteredData && filteredData.length > 0 ? (
+          filteredData?.map((data) => (
+            <Link
+              href={`/reviews/${data.id}`}
+              key={data.id}
+              className="block w-full"
+            >
+              <Card
+                rating={data.rating}
+                description={data.content}
+                title={data.title}
+                type={data.type}
+                backgroundUrl={data.backgroundUrl}
+              />
+            </Link>
+          ))
+        ) : (
+          <div className="col-span-full flex items-center  justify-center py-12 text-center">
+            No reviews found.
+          </div>
+        )}
       </div>
     </>
   );
