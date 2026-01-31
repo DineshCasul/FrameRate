@@ -15,39 +15,112 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 
 type Checked = DropdownMenuCheckboxItemProps["checked"];
 
-export function SortReviews() {
-  const [showStatusBar, setShowStatusBar] = React.useState<Checked>(true);
-  const [showActivityBar, setShowActivityBar] = React.useState<Checked>(false);
-  const [showPanel, setShowPanel] = React.useState<Checked>(false);
+export function SortReviews({
+  data,
+  setFilteredData,
+}: {
+  data: any[];
+  setFilteredData?: (items: any[]) => void;
+}) {
+  const [sortByLowestRating, setSortByLowestRating] =
+    React.useState<Checked>(true);
+  const [sortByHighestRating, setSortByHighestRating] =
+    React.useState<Checked>(false);
+  const [sortByNewest, setSortByNewest] = React.useState<Checked>(false);
+  const [sortByOldest, setSortByOldest] = React.useState<Checked>(false);
+
+  const onSortClick = (sortKey: string, checked: Checked) => {
+    // ensure only the clicked option is checked
+    switch (sortKey) {
+      case "lowest":
+        setSortByLowestRating(checked);
+        setSortByHighestRating(false);
+        setSortByNewest(false);
+        setSortByOldest(false);
+        break;
+      case "highest":
+        setSortByLowestRating(false);
+        setSortByHighestRating(checked);
+        setSortByNewest(false);
+        setSortByOldest(false);
+        break;
+      case "newest":
+        setSortByLowestRating(false);
+        setSortByHighestRating(false);
+        setSortByNewest(checked);
+        setSortByOldest(false);
+        break;
+      case "oldest":
+        setSortByLowestRating(false);
+        setSortByHighestRating(false);
+        setSortByNewest(false);
+        setSortByOldest(checked);
+        break;
+    }
+
+    if (checked) {
+      const sorted = sortReviews(data, sortKey as any);
+      setFilteredData?.(sorted);
+    } else {
+      setFilteredData?.(data);
+    }
+  };
+
+  const sortReviews = (data: any[], sortValue: string) => {
+    const items = [...data];
+    switch (sortValue) {
+      case "newest":
+        return items.sort(
+          (a, b) =>
+            new Date(b.publishedAt).getTime() -
+            new Date(a.publishedAt).getTime()
+        );
+      case "oldest":
+        return items.sort(
+          (a, b) =>
+            new Date(a.publishedAt).getTime() -
+            new Date(b.publishedAt).getTime()
+        );
+      case "highest":
+        return items.sort((a, b) => b.rating - a.rating);
+      case "lowest":
+        return items.sort((a, b) => a.rating - b.rating);
+      default:
+        return items;
+    }
+  };
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button>
-          <CaretSortIcon />
-        </button>
+      <DropdownMenuTrigger>
+        <CaretSortIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Sort</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuCheckboxItem
-          checked={showStatusBar}
-          onCheckedChange={setShowStatusBar}
+          checked={sortByLowestRating}
+          onCheckedChange={(checked) => onSortClick("lowest", checked)}
         >
-          Sort1
+          Lowest Rating
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
-          checked={showActivityBar}
-          onCheckedChange={setShowActivityBar}
-          disabled
+          checked={sortByHighestRating}
+          onCheckedChange={(checked) => onSortClick("highest", checked)}
         >
-          Sort2
+          Highest Rating
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
-          checked={showPanel}
-          onCheckedChange={setShowPanel}
+          checked={sortByNewest}
+          onCheckedChange={(checked) => onSortClick("newest", checked)}
         >
-          Sort3
+          Newest Reviews
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={sortByOldest}
+          onCheckedChange={(checked) => onSortClick("oldest", checked)}
+        >
+          Oldest Reviews
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

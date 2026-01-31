@@ -92,10 +92,8 @@ export function FilterReviews({ data, setFilteredData }: any) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button>
-          <MixerVerticalIcon />
-        </button>
+      <DropdownMenuTrigger>
+        <MixerVerticalIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Type</DropdownMenuLabel>

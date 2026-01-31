@@ -19,13 +19,16 @@ const ReviewsPage = () => {
       <div className="flex w-full border-b my-4 sm:mt-0 mb-8 pb-4 justify-between">
         <div>{`${filteredData?.length} / ${cardData?.length}`}</div>
         <div className="pb-4 flex flex-row sm:flex-row sm:justify-end gap-4 sm:gap-4">
-          <button className="flex item-center gap-2">
+          <div className="flex item-center gap-2">
             <FilterReviews data={cardData} setFilteredData={setFilteredData} />
-          </button>
+          </div>
           |
-          <button className="flex item-center gap-2">
-            <SortReviews />
-          </button>
+          <div className="flex item-center gap-2">
+            <SortReviews
+              data={filteredData}
+              setFilteredData={setFilteredData}
+            />
+          </div>
         </div>
       </div>
 
