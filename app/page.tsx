@@ -6,8 +6,18 @@ export default function Home() {
   return (
     <div className="min-h-full flex flex-col items-center justify-center bg-white dark:bg-black text-black dark:text-white px-6 py-12 dark:border-gray-700">
       <div className="text-center max-w-3xl">
-        <h1 className="text-4xl font-bold mb-4">{homepageData.title}</h1>
-        <p className="text-lg mb-4">{homepageData.subtitle}</p>
+        <div className="mx-auto w-32 h-32">
+          <img
+            src="/images/FrameRate.png"
+            alt="FrameRate Logo"
+            className="mx-auto w-32 h-32 object-contain dark:hidden"
+          />
+          <img
+            src="/images/FrameRate-white.png"
+            alt="FrameRate Logo"
+            className="mx-auto w-32 h-32 object-contain hidden dark:block"
+          />
+        </div>
         <p className="mb-8 whitespace-pre-line">{homepageData.description}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">

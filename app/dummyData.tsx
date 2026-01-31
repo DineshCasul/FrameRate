@@ -2,13 +2,9 @@ import { ReviewKind } from "@/types";
 
 export const homepageData = {
   title: "FrameRate",
-  subtitle: "",
+  subtitle: "FrameRate",
   description: `
-FrameRate helps you decide what’s worth your time.
-We review movies, series, and games with a focus on what actually matters — quality, experience, and whether it’s worth watching or playing.
-
-Explore top reviews, discover new titles, or share your own recommendations.
-Because your time is limited, and good entertainment shouldn’t be a gamble.
+I play it. I watch it. I rate it.
   `,
 };
 
