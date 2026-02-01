@@ -4,7 +4,6 @@ import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { useState, useRef, useEffect } from "react";
 
 type HeaderProps = {
-  isDark: boolean;
   toggleDark: () => void;
 };
 
@@ -42,7 +41,7 @@ const Header = ({ toggleDark }: HeaderProps) => {
   ];
 
   return (
-    <header className="relative flex my-4 sm:justify-center w-full justify-items-start sm:sticky top-0 text-black dark:text-white z-50">
+    <header className="relative flex sm:my-4 sm:justify-center w-full justify-items-start items-center sm:sticky top-0 text-black dark:text-white z-50">
       <div className="border-0 sm:border px-4 sm:px-12 items-start py-4 rounded-sm flex sm:items-center sm:size-fit max-w-4xl bg-white dark:bg-black dark:text-white relative">
         {/* Large screen nav links */}
         <div className="hidden sm:flex gap-12">
@@ -85,7 +84,7 @@ const Header = ({ toggleDark }: HeaderProps) => {
           ))}
         </div>
       )}
-      <div className="absolute sm:right-32 right-8 top-4 sm:top-4">
+      <div className="absolute sm:right-32 right-8 top-6 sm:top-4">
         <Switch onClick={toggleDark} />
       </div>
     </header>

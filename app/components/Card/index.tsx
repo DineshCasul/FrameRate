@@ -13,15 +13,15 @@ type Props = {
 const Card = ({ title, rating, description, type, backgroundUrl }: Props) => {
   return (
     <div
-      className={`border h-48 cursor-pointer relative overflow-hidden group ${
+      className={`border h-40 sm:h-48 cursor-pointer relative overflow-hidden group ${
         type === "movie"
           ? "hover:bg-blue-200 transition ease-in-out dark:hover:bg-blue-900"
           : type === "game"
-          ? "hover:bg-green-200 transition ease-in-out dark:hover:bg-green-900"
-          : type === "series"
-          ? "hover:bg-red-200 transition ease-in-out dark:hover:bg-red-900"
-          : "none"
-      } p-4 w-full sm:w-56`}
+            ? "hover:bg-green-200 transition ease-in-out dark:hover:bg-green-900"
+            : type === "series"
+              ? "hover:bg-red-200 transition ease-in-out dark:hover:bg-red-900"
+              : "none"
+      } p-3 sm:p-4 w-full sm:w-48 md:w-56`}
     >
       {backgroundUrl && (
         <>
@@ -35,21 +35,21 @@ const Card = ({ title, rating, description, type, backgroundUrl }: Props) => {
       )}
       <div className="relative z-10">
         <Tag type={type} />
-        <div className="font-bold text-lg line-clamp-1">{title}</div>
+        <div className="font-bold text-base sm:text-lg line-clamp-1">{title}</div>
         <div
-          className={`text-2xl font-bold ${
+          className={`text-xl sm:text-2xl font-bold ${
             type === "movie"
               ? "text-blue-700 dark:text-blue-400"
               : type === "game"
-              ? "text-green-700 dark:text-green-400"
-              : type === "series"
-              ? "text-red-700 dark:text-red-400"
-              : "text-black"
+                ? "text-green-700 dark:text-green-400"
+                : type === "series"
+                  ? "text-red-700 dark:text-red-400"
+                  : "text-black"
           }`}
         >
           {rating}/10
         </div>
-        <div className="my-4 text-xs line-clamp-3">{description}</div>
+        <div className="my-3 sm:my-4 text-xs sm:text-sm line-clamp-3">{description}</div>
       </div>
     </div>
   );

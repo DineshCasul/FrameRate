@@ -1,27 +1,24 @@
-"use client"; // needed to use state and effects
-
-import { useState } from "react";
 import "./globals.css";
+import type { Metadata } from "next";
+import RootLayoutClient from "./RootLayoutClient";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Header from "./components/Header";
+
+export const metadata: Metadata = {
+  title: "FrameRate | Reviews of Games, Movies & Series",
+  description:
+    "Discover FrameRate: Your source for honest, detailed reviews of games, movies, and TV series. Rate and explore content across all platforms.",
+  keywords: "reviews, games, movies, series, ratings, entertainment",
+};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isDark, setIsDark] = useState(true);
-
   return (
-    <html
-      lang="en"
-      className={!isDark ? "dark w-full min-h-screen" : "w-full min-h-screen"}
-    >
-      <body
-        className={`font-mono min-h-screen flex flex-col bg-white text-black dark:bg-gray-100 dark:text-white`}
-      >
-        <Header isDark={isDark} toggleDark={() => setIsDark(!isDark)} />
-        <div className="sm:mx-24 mx-4 my-6 border sm:p-6 p-2">{children}</div>
+    <html lang="en">
+      <body className="font-mono min-h-screen flex flex-col bg-white text-black dark:bg-black dark:text-white transition-colors">
+        <RootLayoutClient>{children}</RootLayoutClient>
         <SpeedInsights />
       </body>
     </html>

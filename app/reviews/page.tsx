@@ -1,14 +1,18 @@
-"use client";
-import Link from "next/link";
-import Card from "../components/Card";
-import { cardData } from "../dummyData";
-import { FilterReviews } from "../components/FilterReviews";
-import { SortReviews } from "../components/SortReviews";
-import { useState } from "react";
+import { Metadata } from "next";
+import ReviewsClient from "../components/ReviewsClient";
 import BreadCrumbs from "../components/BreadCrumbs";
+import { getReviews } from "@/lib/getReviews";
 
-const ReviewsPage = () => {
-  const [filteredData, setFilteredData] = useState(cardData);
+export const metadata: Metadata = {
+  title: "Reviews | FrameRate",
+  description:
+    "Explore all FrameRate reviews of games, movies, and TV series. Filter and sort by rating, type, and tags.",
+  keywords: "reviews, games, movies, series, ratings",
+};
+
+async function ReviewsPage() {
+  const reviews = await getReviews();
+  console.log("Fetched reviews count:", reviews.length);
   return (
     <>
       <div>
@@ -16,47 +20,9 @@ const ReviewsPage = () => {
           crumbs={[{ label: "Home", href: "/" }, { label: "Reviews" }]}
         />
       </div>
-      <div className="flex w-full border-b my-4 sm:mt-0 mb-8 pb-2 justify-between items-center">
-        <div className="italic">{`Total Results: ${filteredData?.length} / ${cardData?.length}`}</div>
-        <div className="flex flex-row sm:flex-row sm:justify-end gap-4 sm:gap-4">
-          <div className="flex item-center gap-2">
-            <FilterReviews data={cardData} setFilteredData={setFilteredData} />
-          </div>
-          |
-          <div className="flex item-center gap-2">
-            <SortReviews
-              data={filteredData}
-              setFilteredData={setFilteredData}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 justify-items-center">
-        {filteredData && filteredData.length > 0 ? (
-          filteredData?.map((data) => (
-            <Link
-              href={`/reviews/${data.id}`}
-              key={data.id}
-              className="block w-full"
-            >
-              <Card
-                rating={data.rating}
-                description={data.content}
-                title={data.title}
-                type={data.type}
-                backgroundUrl={data.backgroundUrl}
-              />
-            </Link>
-          ))
-        ) : (
-          <div className="col-span-full flex items-center  justify-center py-12 text-center">
-            No reviews found.
-          </div>
-        )}
-      </div>
+      <ReviewsClient initialReviews={reviews} />
     </>
   );
-};
+}
 
 export default ReviewsPage;

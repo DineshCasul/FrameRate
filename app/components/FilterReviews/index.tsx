@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { type DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
+import type { Review } from "@/types";
 
 import {
   DropdownMenu,
@@ -12,88 +13,110 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MixerVerticalIcon } from "@radix-ui/react-icons";
-import { useEffect } from "react";
+import { useEffect, useCallback, useState } from "react";
 
 type Checked = DropdownMenuCheckboxItemProps["checked"];
 
-export function FilterReviews({ data, setFilteredData }: any) {
-  const [showAll, setShowAll] = React.useState<Checked>(true);
-  const [showSeries, setShowSeries] = React.useState<Checked>(false);
-  const [showGames, setShowGames] = React.useState<Checked>(false);
-  const [showMovies, setShowMovies] = React.useState<Checked>(false);
-  const [showNinePlus, setShowNinePlus] = React.useState<Checked>(false);
-  const [showEightPlus, setShowEightPlus] = React.useState<Checked>(false);
-  const [showSevenPlus, setShowSevenPlus] = React.useState<Checked>(false);
+interface FilterReviewsProps {
+  data: Review[];
+  setFilteredData: (data: Review[]) => void;
+}
+
+const REVIEW_TYPES = [
+  { key: "movies", label: "Movies", type: "movie" as const },
+  { key: "series", label: "Series", type: "series" as const },
+  { key: "games", label: "Games", type: "game" as const },
+];
+
+const RATING_THRESHOLDS = [
+  { key: "ninePlus", label: "9+", rating: 9 },
+  { key: "eightPlus", label: "8+", rating: 8 },
+  { key: "sevenPlus", label: "7+", rating: 7 },
+];
+
+export function FilterReviews({ data, setFilteredData }: FilterReviewsProps) {
+  const [showAll, setShowAll] = useState<Checked>(true);
+  const [selectedTypes, setSelectedTypes] = useState<Record<string, Checked>>({
+    movies: false,
+    series: false,
+    games: false,
+  });
+  const [selectedRatings, setSelectedRatings] = useState<
+    Record<string, Checked>
+  >({
+    ninePlus: false,
+    eightPlus: false,
+    sevenPlus: false,
+  });
 
   useEffect(() => {
     let filtered = data;
-    if (
-      !showAll &&
-      (showSeries ||
-        showGames ||
-        showMovies ||
-        showNinePlus ||
-        showEightPlus ||
-        showSevenPlus)
-    ) {
-      filtered = data.filter((item: any) => {
-        const typeSelected = showSeries || showGames || showMovies;
-        const ratingSelected = showNinePlus || showEightPlus || showSevenPlus;
 
+    const hasTypeFilter = Object.values(selectedTypes).some(Boolean);
+    const hasRatingFilter = Object.values(selectedRatings).some(Boolean);
+
+    if (!showAll && (hasTypeFilter || hasRatingFilter)) {
+      filtered = data.filter((item: Review) => {
         const typeMatch =
-          !typeSelected ||
-          (showSeries && item.type === "series") ||
-          (showGames && item.type === "game") ||
-          (showMovies && item.type === "movie");
+          !hasTypeFilter ||
+          (selectedTypes.movies && item.type === "movie") ||
+          (selectedTypes.series && item.type === "series") ||
+          (selectedTypes.games && item.type === "game");
 
         const ratingMatch =
-          !ratingSelected ||
-          (showNinePlus && item.rating >= 9) ||
-          (showEightPlus && item.rating >= 8) ||
-          (showSevenPlus && item.rating >= 7);
+          !hasRatingFilter ||
+          (selectedRatings.ninePlus && item.rating >= 9) ||
+          (selectedRatings.eightPlus && item.rating >= 8) ||
+          (selectedRatings.sevenPlus && item.rating >= 7);
 
         return typeMatch && ratingMatch;
       });
     }
-    setFilteredData(filtered);
-  }, [
-    showAll,
-    showSeries,
-    showGames,
-    showMovies,
-    showNinePlus,
-    showEightPlus,
-    showSevenPlus,
-    data,
-    setFilteredData,
-  ]);
 
-  const handleShowAllChange = (checked: Checked) => {
+    setFilteredData(filtered);
+  }, [showAll, selectedTypes, selectedRatings, data, setFilteredData]);
+
+  const handleShowAllChange = useCallback((checked: Checked) => {
     setShowAll(checked);
     if (checked) {
-      setShowSeries(false);
-      setShowGames(false);
-      setShowMovies(false);
-      setShowNinePlus(false);
-      setShowEightPlus(false);
-      setShowSevenPlus(false);
+      setSelectedTypes({
+        movies: false,
+        series: false,
+        games: false,
+      });
+      setSelectedRatings({
+        ninePlus: false,
+        eightPlus: false,
+        sevenPlus: false,
+      });
     }
-  };
+  }, []);
 
-  const handleTypeChange = (
-    setter: (checked: Checked) => void,
-    checked: Checked
-  ) => {
-    setter(checked);
-    if (checked) {
+  const handleTypeChange = useCallback((typeKey: string, checked: Checked) => {
+    setShowAll(false);
+    setSelectedTypes((prev) => ({
+      ...prev,
+      [typeKey]: checked,
+    }));
+  }, []);
+
+  const handleRatingChange = useCallback(
+    (ratingKey: string, checked: Checked) => {
       setShowAll(false);
-    }
-  };
+      setSelectedRatings((prev) => ({
+        ...prev,
+        [ratingKey]: checked,
+      }));
+    },
+    [],
+  );
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <MixerVerticalIcon />
+      <DropdownMenuTrigger asChild>
+        <button className="cursor-pointer">
+          <MixerVerticalIcon />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Type</DropdownMenuLabel>
@@ -104,55 +127,27 @@ export function FilterReviews({ data, setFilteredData }: any) {
         >
           All
         </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showMovies}
-          onCheckedChange={(checked) =>
-            handleTypeChange(setShowMovies, checked)
-          }
-        >
-          Movies
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showSeries}
-          onCheckedChange={(checked) =>
-            handleTypeChange(setShowSeries, checked)
-          }
-        >
-          Series
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showGames}
-          onCheckedChange={(checked) => handleTypeChange(setShowGames, checked)}
-        >
-          Games
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuLabel>Rating</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        {REVIEW_TYPES.map(({ key, label }) => (
+          <DropdownMenuCheckboxItem
+            key={key}
+            checked={selectedTypes[key]}
+            onCheckedChange={(checked) => handleTypeChange(key, checked)}
+          >
+            {label}
+          </DropdownMenuCheckboxItem>
+        ))}
 
-        <DropdownMenuCheckboxItem
-          checked={showNinePlus}
-          onCheckedChange={(checked) =>
-            handleTypeChange(setShowNinePlus, checked)
-          }
-        >
-          9+
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showEightPlus}
-          onCheckedChange={(checked) =>
-            handleTypeChange(setShowEightPlus, checked)
-          }
-        >
-          8+
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showSevenPlus}
-          onCheckedChange={(checked) =>
-            handleTypeChange(setShowSevenPlus, checked)
-          }
-        >
-          7+
-        </DropdownMenuCheckboxItem>
+        <DropdownMenuLabel className="mt-2">Rating</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {RATING_THRESHOLDS.map(({ key, label }) => (
+          <DropdownMenuCheckboxItem
+            key={key}
+            checked={selectedRatings[key]}
+            onCheckedChange={(checked) => handleRatingChange(key, checked)}
+          >
+            {label}
+          </DropdownMenuCheckboxItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
