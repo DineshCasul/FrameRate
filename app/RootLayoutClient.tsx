@@ -2,6 +2,7 @@
 
 import { useState, ReactNode } from "react";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 export default function RootLayoutClient({
   children,
@@ -25,10 +26,11 @@ export default function RootLayoutClient({
 
   return (
     <>
-      <Header toggleDark={toggleDark} isDark={isDark} />
+      <Header />
       <main id="main-content" className="flex-1 w-full">
         {children}
       </main>
+      <Footer toggleDark={toggleDark} isDark={isDark} />
     </>
   );
 }
