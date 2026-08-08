@@ -1,7 +1,10 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import ReviewsClient from "../components/ReviewsClient";
 import BreadCrumbs from "../components/BreadCrumbs";
-import { getReviews } from "@/lib/getReviews";
+import { getPublishedReviews } from "@/lib/getReviews";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Reviews | FrameRate",
@@ -11,17 +14,16 @@ export const metadata: Metadata = {
 };
 
 async function ReviewsPage() {
-  const reviews = await getReviews();
-  console.log("Fetched reviews count:", reviews.length);
+  const reviews = await getPublishedReviews();
   return (
-    <>
-      <div>
-        <BreadCrumbs
-          crumbs={[{ label: "Home", href: "/" }, { label: "Reviews" }]}
-        />
-      </div>
-      <ReviewsClient initialReviews={reviews} />
-    </>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <BreadCrumbs
+        crumbs={[{ label: "Home", href: "/" }, { label: "Reviews" }]}
+      />
+      <Suspense fallback={null}>
+        <ReviewsClient initialReviews={reviews} />
+      </Suspense>
+    </div>
   );
 }
 

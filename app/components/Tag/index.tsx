@@ -1,4 +1,5 @@
 import { ReviewKind } from "@/types";
+import { TYPE_COLOR_CLASSES } from "@/lib/utils";
 
 type Props = {
   type: ReviewKind;
@@ -6,17 +7,7 @@ type Props = {
 
 const Tag = ({ type }: Props) => {
   return (
-    <div
-      className={`text-lg italic ${
-        type === "movie"
-          ? "text-blue-500"
-          : type === "game"
-          ? "text-green-500"
-          : type === "series"
-          ? "text-red-700"
-          : "text-black"
-      }`}
-    >
+    <div className={`text-lg italic ${TYPE_COLOR_CLASSES[type].text}`}>
       [{type}]
     </div>
   );

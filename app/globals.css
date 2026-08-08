@@ -38,6 +38,17 @@
   --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
   --sidebar-border: oklch(0.928 0.006 264.531);
   --sidebar-ring: oklch(0.707 0.022 261.325);
+
+  /* Review-type accents — pastel, validated for CVD separation + contrast
+     in both themes (see FrameRate/2026-08-09 - Type Color Palette.md) */
+  --type-movie: #3e6fb8;
+  --type-game: #268257;
+  --type-series: #b34e80;
+
+  /* Pros/cons status accents — deliberately a separate palette from the
+     type accents above, not reused hues (see Type Color Palette note) */
+  --status-good: #238055;
+  --status-bad: #c94a44;
 }
 
 /* Optional: dark mode defaults if you want fallback */
@@ -91,6 +102,11 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-type-movie: var(--type-movie);
+  --color-type-game: var(--type-game);
+  --color-type-series: var(--type-series);
+  --color-status-good: var(--status-good);
+  --color-status-bad: var(--status-bad);
 }
 
 .dark {
@@ -125,6 +141,13 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0.002 247.839);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  --type-movie: #4a7fc7;
+  --type-game: #2e9464;
+  --type-series: #b2558a;
+
+  --status-good: #2fa06c;
+  --status-bad: #dd6b65;
 }
 
 @layer base {
@@ -133,5 +156,8 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  a, button, [role="button"], input, select, textarea {
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
   }
 }

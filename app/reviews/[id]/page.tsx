@@ -1,7 +1,11 @@
-﻿import BreadCrumbs from "@/app/components/BreadCrumbs";
-import { getReviews } from "@/lib/getReviews";
+import BreadCrumbs from "@/app/components/BreadCrumbs";
+import Card from "@/app/components/Card";
+import { YouTubeFacade } from "@/app/components/YouTubeFacade";
+import { getPublishedReviews } from "@/lib/getReviews";
+import { parseContent, getYouTubeId, TYPE_COLOR_CLASSES } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import type { Metadata } from "next";
 import type { Review } from "@/types";
 
@@ -10,16 +14,9 @@ interface PageProps {
 }
 
 async function getReviewById(id: string): Promise<Review | null> {
-  const reviews = await getReviews();
+  const reviews = await getPublishedReviews();
   return reviews.find((r) => r.id === id || r.slug === id) || null;
 }
-
-// Helper to normalize content to string array
-const parseContent = (content: string[] | string | undefined): string[] => {
-  if (Array.isArray(content)) return content;
-  if (typeof content === "string") return content.split("\n").filter(Boolean);
-  return [];
-};
 
 export async function generateMetadata({
   params,
@@ -42,120 +39,71 @@ export async function generateMetadata({
 
 export default async function ReviewDetail({ params }: PageProps) {
   const { id } = await params;
-  const review = await getReviewById(id);
+  const allReviews = await getPublishedReviews();
+  const review = allReviews.find((r) => r.id === id || r.slug === id);
 
   if (!review) {
     return notFound();
   }
 
   const contentParagraphs = parseContent(review.content);
+  const youtubeId = getYouTubeId(review.trailerUrl) ?? review.youtubeId;
+  const typeAccent = TYPE_COLOR_CLASSES[review.type].bg;
+
+  const currentIndex = allReviews.findIndex((r) => r.id === review.id);
+  const previousReview = allReviews[currentIndex - 1] ?? null;
+  const nextReview = allReviews[currentIndex + 1] ?? null;
+
+  const relatedReviews = allReviews
+    .filter(
+      (r) =>
+        r.id !== review.id &&
+        (r.type === review.type || r.tags.some((tag) => review.tags.includes(tag))),
+    )
+    .slice(0, 3);
 
   return (
-    <>
+    <div className="max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
+      <BreadCrumbs
+        crumbs={[
+          { label: "Home", href: "/" },
+          { label: "Reviews", href: "/reviews" },
+          { label: review.title },
+        ]}
+      />
       <div>
-        <BreadCrumbs
-          crumbs={[
-            { label: "Home", href: "/" },
-            { label: "Reviews", href: "/reviews" },
-            { label: review.title },
-          ]}
-        />
-      </div>
-      <div className="min-h-screen p-4 sm:p-8 bg-white dark:bg-black text-black dark:text-white">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
           {review.title}
         </h1>
 
-        <div className="flex flex-wrap gap-2 mb-4 text-xs sm:text-sm">
-          <span className="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded text-xs sm:text-sm capitalize">
+        <div className="flex flex-wrap gap-2 mb-6 text-xs sm:text-sm">
+          <span className={`px-2 sm:px-3 py-1 text-white rounded text-xs sm:text-sm capitalize ${typeAccent}`}>
             {review.type}
           </span>
           {review.tags.map((tag) => (
-            <span
+            <Link
               key={tag}
-              className="px-2 sm:px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded text-xs sm:text-sm"
+              href={`/reviews?tag=${encodeURIComponent(tag)}`}
+              className="px-2 sm:px-3 py-1 bg-secondary rounded text-xs sm:text-sm hover:opacity-80 transition"
             >
               {tag}
-            </span>
+            </Link>
           ))}
         </div>
 
-        <p className="text-xl sm:text-2xl font-bold mb-4 border-b pb-4">
-          Rating: {review.rating}/10
-        </p>
-
-        {review.summary && (
-          <div className="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded mb-6 italic text-sm sm:text-base">
-            <strong>Summary:</strong> {review.summary}
+        {/* At a glance: score + verdict, paired as one statement instead of split top/bottom */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 pb-6 border-b">
+          <div
+            className={`shrink-0 flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-2xl text-white ${typeAccent}`}
+          >
+            <span className="text-4xl sm:text-5xl font-bold leading-none">{review.rating}</span>
           </div>
-        )}
-
-        {review.trailerUrl && (
-          <div className="flex justify-center mb-6 -mx-4 sm:-mx-8 px-4 sm:px-8">
-            <div className="w-full max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-4xl aspect-video">
-              <iframe
-                className="w-full h-full rounded-md"
-                src={review.trailerUrl.replace("watch?v=", "embed/")}
-                title={`${review.title} Trailer`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        )}
-
-        <p className="first-letter:text-3xl sm:first-letter:text-4xl md:first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left mt-4 pt-4 border-t text-sm sm:text-base">
-          {contentParagraphs[0]}
-        </p>
-
-        <div className="border-b mb-6 pb-4">
-          {contentParagraphs.slice(1).map((para, i) => (
-            <p key={i} className="mb-4 leading-relaxed text-sm sm:text-base">
-              {para}
+          {review.verdict && (
+            <p className="text-base sm:text-lg font-semibold leading-snug text-center sm:text-left">
+              {review.verdict}
             </p>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {review.pros && review.pros.length > 0 && (
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 text-green-600">
-                Pros
-              </h3>
-              <ul className="space-y-2 text-sm sm:text-base">
-                {review.pros.map((pro, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-green-600 font-bold"></span>
-                    <span>{pro}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {review.cons && review.cons.length > 0 && (
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-3 text-red-600">
-                Cons
-              </h3>
-              <ul className="space-y-2 text-sm sm:text-base">
-                {review.cons.map((con, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-red-600 font-bold"></span>
-                    <span>{con}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
           )}
         </div>
-
-        {review.verdict && (
-          <div className="bg-blue-100 dark:bg-blue-900 p-3 sm:p-4 rounded mb-6">
-            <h3 className="text-lg sm:text-xl font-bold mb-2">Final Verdict</h3>
-            <p className="text-sm sm:text-base">{review.verdict}</p>
-          </div>
-        )}
 
         {review.aspectRatings &&
           Object.keys(review.aspectRatings).length > 0 && (
@@ -172,9 +120,9 @@ export default async function ReviewDetail({ params }: PageProps) {
                           {aspect.replace(/([A-Z])/g, " $1")}
                         </div>
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
-                          <div className="w-full bg-gray-300 dark:bg-gray-700 rounded h-2">
+                          <div className="w-full bg-secondary rounded h-2">
                             <div
-                              className="bg-blue-600 h-2 rounded"
+                              className={`${typeAccent} h-2 rounded`}
                               style={{ width: `${(rating / 10) * 100}%` }}
                             />
                           </div>
@@ -187,8 +135,68 @@ export default async function ReviewDetail({ params }: PageProps) {
             </div>
           )}
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {review.pros && review.pros.length > 0 && (
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 text-status-good">
+                What I Loved
+              </h3>
+              <ul className="space-y-2 text-sm sm:text-base">
+                {review.pros.map((pro, i) => (
+                  <li key={i} className="flex items-center gap-2.5">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-status-good text-white shrink-0">
+                      <CheckIcon className="w-3 h-3" />
+                    </span>
+                    <span>{pro}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {review.cons && review.cons.length > 0 && (
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold mb-3 text-status-bad">
+                What I Didn&apos;t Like
+              </h3>
+              <ul className="space-y-2 text-sm sm:text-base">
+                {review.cons.map((con, i) => (
+                  <li key={i} className="flex items-center gap-2.5">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-status-bad text-white shrink-0">
+                      <Cross2Icon className="w-3 h-3" />
+                    </span>
+                    <span>{con}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {youtubeId && (
+          <div className="flex justify-center mb-6 -mx-4 sm:-mx-8 px-4 sm:px-8">
+            <div className="w-full max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-4xl aspect-video">
+              <YouTubeFacade videoId={youtubeId} title={`${review.title} Trailer`} />
+            </div>
+          </div>
+        )}
+
+        {/* The full write-up — the argument behind the score/verdict above */}
+        <div className="border-t pt-6">
+          {review.summary && (
+            <p className="italic text-muted-foreground mb-4 text-sm sm:text-base">
+              {review.summary}
+            </p>
+          )}
+          {contentParagraphs.map((para, i) => (
+            <p key={i} className="mb-4 leading-relaxed text-sm sm:text-base">
+              {para}
+            </p>
+          ))}
+        </div>
+
         {(review.playtime || review.platform || review.recommendedFor) && (
-          <div className="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-sm sm:text-base">
+          <div className="bg-muted p-3 sm:p-4 rounded mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-sm sm:text-base">
             {review.playtime && (
               <div>
                 <h4 className="font-bold mb-1">Playtime</h4>
@@ -210,15 +218,61 @@ export default async function ReviewDetail({ params }: PageProps) {
           </div>
         )}
 
+        {(previousReview || nextReview) && (
+          <div className="flex justify-between items-center gap-4 border-t pt-4 mt-8 text-sm sm:text-base">
+            {previousReview ? (
+              <Link
+                href={`/reviews/${previousReview.slug || previousReview.id}`}
+                className="hover:underline"
+              >
+                &larr; {previousReview.title}
+              </Link>
+            ) : (
+              <span />
+            )}
+            {nextReview && (
+              <Link
+                href={`/reviews/${nextReview.slug || nextReview.id}`}
+                className="hover:underline text-right"
+              >
+                {nextReview.title} &rarr;
+              </Link>
+            )}
+          </div>
+        )}
+
+        {relatedReviews.length > 0 && (
+          <div className="mt-10">
+            <h3 className="text-lg sm:text-xl font-bold mb-4">You Might Also Like</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 justify-items-center">
+              {relatedReviews.map((r) => (
+                <Link
+                  href={`/reviews/${r.slug || r.id}`}
+                  key={r.id}
+                  className="block w-full"
+                >
+                  <Card
+                    rating={r.rating}
+                    description={r.content}
+                    title={r.title}
+                    type={r.type}
+                    backgroundUrl={r.backgroundUrl}
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center w-full justify-center mt-8">
           <Link
             href="/reviews"
-            className="inline-block flex items-center px-4 py-2 text-sm sm:text-base text-black dark:text-white rounded hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+            className="inline-block flex items-center px-4 py-2 text-sm sm:text-base rounded hover:bg-muted transition-colors"
           >
             &larr; Back to Reviews
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { type DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
-import type { Review } from "@/types";
+import type { ReviewKind } from "@/types";
 
 import {
   DropdownMenu,
@@ -13,125 +13,77 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MixerVerticalIcon } from "@radix-ui/react-icons";
-import { useEffect, useCallback, useState } from "react";
 
 type Checked = DropdownMenuCheckboxItemProps["checked"];
 
-interface FilterReviewsProps {
-  data: Review[];
-  setFilteredData: (data: Review[]) => void;
-}
-
-const REVIEW_TYPES = [
-  { key: "movies", label: "Movies", type: "movie" as const },
-  { key: "series", label: "Series", type: "series" as const },
-  { key: "games", label: "Games", type: "game" as const },
+const REVIEW_TYPES: { label: string; type: ReviewKind }[] = [
+  { label: "Movies", type: "movie" },
+  { label: "Series", type: "series" },
+  { label: "Games", type: "game" },
 ];
 
 const RATING_THRESHOLDS = [
-  { key: "ninePlus", label: "9+", rating: 9 },
-  { key: "eightPlus", label: "8+", rating: 8 },
-  { key: "sevenPlus", label: "7+", rating: 7 },
+  { label: "9+", rating: 9 },
+  { label: "8+", rating: 8 },
+  { label: "7+", rating: 7 },
 ];
 
-export function FilterReviews({ data, setFilteredData }: FilterReviewsProps) {
-  const [showAll, setShowAll] = useState<Checked>(true);
-  const [selectedTypes, setSelectedTypes] = useState<Record<string, Checked>>({
-    movies: false,
-    series: false,
-    games: false,
-  });
-  const [selectedRatings, setSelectedRatings] = useState<
-    Record<string, Checked>
-  >({
-    ninePlus: false,
-    eightPlus: false,
-    sevenPlus: false,
-  });
+interface FilterReviewsProps {
+  activeTypes: ReviewKind[];
+  activeRating: number | null;
+  onTypesChange: (types: ReviewKind[]) => void;
+  onRatingChange: (rating: number | null) => void;
+}
 
-  useEffect(() => {
-    let filtered = data;
+export function FilterReviews({
+  activeTypes,
+  activeRating,
+  onTypesChange,
+  onRatingChange,
+}: FilterReviewsProps) {
+  const isActive = activeTypes.length > 0 || activeRating !== null;
 
-    const hasTypeFilter = Object.values(selectedTypes).some(Boolean);
-    const hasRatingFilter = Object.values(selectedRatings).some(Boolean);
-
-    if (!showAll && (hasTypeFilter || hasRatingFilter)) {
-      filtered = data.filter((item: Review) => {
-        const typeMatch =
-          !hasTypeFilter ||
-          (selectedTypes.movies && item.type === "movie") ||
-          (selectedTypes.series && item.type === "series") ||
-          (selectedTypes.games && item.type === "game");
-
-        const ratingMatch =
-          !hasRatingFilter ||
-          (selectedRatings.ninePlus && item.rating >= 9) ||
-          (selectedRatings.eightPlus && item.rating >= 8) ||
-          (selectedRatings.sevenPlus && item.rating >= 7);
-
-        return typeMatch && ratingMatch;
-      });
-    }
-
-    setFilteredData(filtered);
-  }, [showAll, selectedTypes, selectedRatings, data, setFilteredData]);
-
-  const handleShowAllChange = useCallback((checked: Checked) => {
-    setShowAll(checked);
+  const handleShowAllChange = (checked: Checked) => {
     if (checked) {
-      setSelectedTypes({
-        movies: false,
-        series: false,
-        games: false,
-      });
-      setSelectedRatings({
-        ninePlus: false,
-        eightPlus: false,
-        sevenPlus: false,
-      });
+      onTypesChange([]);
+      onRatingChange(null);
     }
-  }, []);
+  };
 
-  const handleTypeChange = useCallback((typeKey: string, checked: Checked) => {
-    setShowAll(false);
-    setSelectedTypes((prev) => ({
-      ...prev,
-      [typeKey]: checked,
-    }));
-  }, []);
+  const handleTypeChange = (type: ReviewKind, checked: Checked) => {
+    onTypesChange(
+      checked ? [...activeTypes, type] : activeTypes.filter((t) => t !== type),
+    );
+  };
 
-  const handleRatingChange = useCallback(
-    (ratingKey: string, checked: Checked) => {
-      setShowAll(false);
-      setSelectedRatings((prev) => ({
-        ...prev,
-        [ratingKey]: checked,
-      }));
-    },
-    [],
-  );
+  const handleRatingChange = (rating: number, checked: Checked) => {
+    onRatingChange(checked ? rating : null);
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="cursor-pointer">
+        <button
+          className="cursor-pointer relative"
+          aria-label={isActive ? "Filter reviews (active)" : "Filter reviews"}
+        >
           <MixerVerticalIcon />
+          {isActive && (
+            <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-primary" />
+          )}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Type</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuCheckboxItem
-          checked={showAll}
-          onCheckedChange={handleShowAllChange}
-        >
+        <DropdownMenuCheckboxItem checked={!isActive} onCheckedChange={handleShowAllChange}>
           All
         </DropdownMenuCheckboxItem>
-        {REVIEW_TYPES.map(({ key, label }) => (
+        {REVIEW_TYPES.map(({ type, label }) => (
           <DropdownMenuCheckboxItem
-            key={key}
-            checked={selectedTypes[key]}
-            onCheckedChange={(checked) => handleTypeChange(key, checked)}
+            key={type}
+            checked={activeTypes.includes(type)}
+            onCheckedChange={(checked) => handleTypeChange(type, checked)}
           >
             {label}
           </DropdownMenuCheckboxItem>
@@ -139,11 +91,11 @@ export function FilterReviews({ data, setFilteredData }: FilterReviewsProps) {
 
         <DropdownMenuLabel className="mt-2">Rating</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {RATING_THRESHOLDS.map(({ key, label }) => (
+        {RATING_THRESHOLDS.map(({ rating, label }) => (
           <DropdownMenuCheckboxItem
-            key={key}
-            checked={selectedRatings[key]}
-            onCheckedChange={(checked) => handleRatingChange(key, checked)}
+            key={rating}
+            checked={activeRating === rating}
+            onCheckedChange={(checked) => handleRatingChange(rating, checked)}
           >
             {label}
           </DropdownMenuCheckboxItem>

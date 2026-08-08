@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { type DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
 import {
   DropdownMenu,
@@ -14,12 +13,7 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 
 type Checked = DropdownMenuCheckboxItemProps["checked"];
 
-interface SortOption {
-  key: string;
-  label: string;
-}
-
-const SORT_OPTIONS: SortOption[] = [
+const SORT_OPTIONS = [
   { key: "lowest", label: "Lowest Rating" },
   { key: "highest", label: "Highest Rating" },
   { key: "newest", label: "Newest Reviews" },
@@ -27,23 +21,26 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 interface SortReviewsProps {
-  onSortChange?: (sortKey: string | null) => void;
+  activeSortKey: string | null;
+  onSortChange: (sortKey: string | null) => void;
 }
 
-export function SortReviews({ onSortChange }: SortReviewsProps) {
-  const [activeSortKey, setActiveSortKey] = React.useState<string | null>(null);
-
+export function SortReviews({ activeSortKey, onSortChange }: SortReviewsProps) {
   const handleSortClick = (sortKey: string, checked: Checked) => {
-    const newSortKey = checked ? sortKey : null;
-    setActiveSortKey(newSortKey);
-    onSortChange?.(newSortKey);
+    onSortChange(checked ? sortKey : null);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="cursor-pointer">
+        <button
+          className="cursor-pointer relative"
+          aria-label={activeSortKey ? "Sort reviews (active)" : "Sort reviews"}
+        >
           <CaretSortIcon />
+          {activeSortKey && (
+            <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-primary" />
+          )}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">

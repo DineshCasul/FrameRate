@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import Header from "./components/Header";
 
 export default function RootLayoutClient({
@@ -8,25 +8,13 @@ export default function RootLayoutClient({
 }: {
   children: ReactNode;
 }) {
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Load saved preference from localStorage
-    const saved = localStorage.getItem("dark-mode");
-    const prefersDark =
-      saved !== null
-        ? saved === "true"
-        : window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-    setIsDark(prefersDark);
-    if (prefersDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    setMounted(true);
-  }, []);
+  // The inline script in layout.tsx already applies the "dark" class before
+  // hydration, so read it back instead of recomputing (and re-triggering) it here.
+  const [isDark, setIsDark] = useState(
+    () =>
+      typeof document !== "undefined" &&
+      document.documentElement.classList.contains("dark"),
+  );
 
   const toggleDark = () => {
     const newVal = !isDark;
@@ -35,12 +23,12 @@ export default function RootLayoutClient({
     document.documentElement.classList.toggle("dark", newVal);
   };
 
-  if (!mounted) return <>{children}</>;
-
   return (
     <>
-      <Header toggleDark={toggleDark} />
-      <div className=" sm:mx-24 mx-4 border sm:p-6 p-2 sm:my-6">{children}</div>
+      <Header toggleDark={toggleDark} isDark={isDark} />
+      <main id="main-content" className="flex-1 w-full">
+        {children}
+      </main>
     </>
   );
 }

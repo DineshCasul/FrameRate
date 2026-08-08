@@ -23,6 +23,7 @@ export type Review = {
   tags: string[];
 
   publishedAt: string;
+  created_at?: string; // set by Supabase, used for newest/oldest sorting
 
   youtubeId?: string;
   trailerUrl?: string;
