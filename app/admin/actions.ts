@@ -3,7 +3,7 @@
 import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { aspectFieldsFor, linesToArray, slugify, toSnakeCase } from "@/lib/utils";
 import type { ReviewKind } from "@/types";
 
@@ -67,6 +67,7 @@ export async function saveReview(
   };
 
   const row = toSnakeCase(fields);
+  const supabaseAdmin = getSupabaseAdmin();
 
   const { error } = id
     ? await supabaseAdmin.from("reviews").update(row).eq("id", id)
@@ -101,6 +102,7 @@ let bucketReady = false;
 // manual dashboard setup step — idempotent, cached per server process.
 async function ensureImageBucket() {
   if (bucketReady) return;
+  const supabaseAdmin = getSupabaseAdmin();
   const { data } = await supabaseAdmin.storage.listBuckets();
   if (!data?.some((b) => b.name === IMAGE_BUCKET)) {
     await supabaseAdmin.storage.createBucket(IMAGE_BUCKET, { public: true });
@@ -120,6 +122,7 @@ export async function uploadImage(formData: FormData): Promise<UploadImageResult
   }
 
   await ensureImageBucket();
+  const supabaseAdmin = getSupabaseAdmin();
 
   const ext = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
   const path = `${randomUUID()}.${ext}`;
@@ -139,7 +142,7 @@ export async function deleteReview(formData: FormData): Promise<{ error?: string
   const slug = toText(formData.get("slug"));
   if (!id) return {};
 
-  const { error } = await supabaseAdmin.from("reviews").delete().eq("id", id);
+  const { error } = await getSupabaseAdmin().from("reviews").delete().eq("id", id);
   if (error) return { error: error.message };
 
   revalidatePath("/admin");

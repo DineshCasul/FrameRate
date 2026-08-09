@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { supabaseAdmin } from './supabaseAdmin';
+import { getSupabaseAdmin } from './supabaseAdmin';
 import type { Review } from '@/types';
 
 // Postgres/PostgREST returns column names verbatim (snake_case: background_url,
@@ -24,7 +24,7 @@ function normalizeReview(row: Record<string, unknown>): Review {
 // drafts — service role bypasses RLS by design, same as the write path in
 // app/admin/actions.ts. Never call this from a public-facing page.
 export async function getReviews(): Promise<Review[]> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('reviews')
     .select('*')
     .order('created_at', { ascending: false });
