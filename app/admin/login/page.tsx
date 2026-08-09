@@ -2,8 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/app/components/Logo";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
@@ -36,21 +36,8 @@ export default function AdminLoginPage() {
   return (
     <div className="h-full flex items-center justify-center px-4 py-6">
       <div className="w-full max-w-sm">
-        <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 relative mb-4">
-          <Image
-            src="/images/FrameRate.png"
-            alt="FrameRate"
-            width={80}
-            height={80}
-            className="mx-auto object-contain dark:hidden"
-          />
-          <Image
-            src="/images/FrameRate-white.png"
-            alt="FrameRate"
-            width={80}
-            height={80}
-            className="mx-auto object-contain hidden dark:block"
-          />
+        <div className="flex justify-center mb-4">
+          <Logo size={80} className="w-16 h-auto sm:w-20" />
         </div>
 
         <form

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { HamburgerMenuIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useState, useRef, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
+import Logo from "@/app/components/Logo";
 import { TYPE_QUICK_LINKS } from "@/lib/utils";
 
 type Props = {
@@ -66,19 +66,8 @@ const Header = ({ toggleDark, isDark }: Props) => {
         }`}
       >
         {/* Small screen logo */}
-        <Link href="/" className="sm:hidden w-8 h-8 relative shrink-0">
-          <Image
-            src="/images/FrameRate.png"
-            alt="FrameRate"
-            fill
-            className="object-contain dark:hidden"
-          />
-          <Image
-            src="/images/FrameRate-white.png"
-            alt="FrameRate"
-            fill
-            className="object-contain hidden dark:block"
-          />
+        <Link href="/" className="sm:hidden shrink-0">
+          <Logo size={32} />
         </Link>
 
         {/* Large screen nav links */}
