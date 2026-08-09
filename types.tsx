@@ -34,8 +34,10 @@ export type Review = {
   // Short intro / TLDR
   summary: string;
 
-  // Main long-form review (markdown later)
-  content: string[];
+  // Main long-form review (markdown later). Supabase stores this as either
+  // a text[] column or a single newline-delimited string depending on how
+  // the row was saved — see parseContent() in lib/utils.ts.
+  content: string[] | string;
 
   pros: string[];
   cons: string[];

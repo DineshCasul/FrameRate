@@ -159,3 +159,55 @@ body {
     @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
   }
 }
+
+/* Aspect-rating bars (ReviewDetail) grow in from the left on mount instead
+   of just appearing — width itself stays a plain inline style (dynamic per
+   rating), this only animates the scale so it works for any width value. */
+@keyframes fill-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.animate-fill-bar {
+  transform-origin: left;
+  animation: fill-bar 700ms ease-out both;
+}
+
+/* Generic SVG stroke "draw itself in" — used by the Logo component. Each
+   line/circle sets its own --dash-length (its actual stroke length, so this
+   works for any segment) plus a full `animation` shorthand inline for
+   per-stroke duration/delay; this keyframe just needs the shared variable. */
+@keyframes stroke-draw {
+  from { stroke-dashoffset: var(--dash-length, 0); }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Homepage featured cards "dealt" in from alternating sides with a slight
+   rotation, instead of a plain fade+slide — used only for the intro grid. */
+@keyframes deal-in-left {
+  from { opacity: 0; transform: translate(-24px, 30px) rotate(-8deg); }
+  to { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+}
+@keyframes deal-in-right {
+  from { opacity: 0; transform: translate(24px, 30px) rotate(8deg); }
+  to { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+}
+.animate-deal-in-left {
+  animation: deal-in-left 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-deal-in-right {
+  animation: deal-in-right 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Respect the OS-level "reduce motion" setting — every animation/transition
+   on the site collapses to effectively instant rather than being removed
+   outright, so layout/fill-mode outcomes stay identical either way. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -87,7 +87,7 @@ export default function ReviewsClient({ initialReviews }: ReviewsClientProps) {
 
   return (
     <>
-      <div className="flex flex-col gap-3 w-full border-b my-4 sm:mt-0 mb-8 pb-3">
+      <div className="flex flex-col gap-3 w-full border-b my-4 sm:mt-0 mb-8 pb-3 animate-in fade-in slide-in-from-top-2 duration-500 fill-mode-both">
         <div className="flex justify-between items-center">
           <div className="italic">{`Total Results: ${filteredData.length} / ${initialReviews.length}`}</div>
           <div className="flex items-center gap-4">
@@ -120,11 +120,12 @@ export default function ReviewsClient({ initialReviews }: ReviewsClientProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 justify-items-center">
         {filteredData.length > 0 ? (
-          filteredData.map((data) => (
+          filteredData.map((data, i) => (
             <Link
               href={`/reviews/${data.slug || data.id}`}
               key={data.id}
-              className="block w-full"
+              className="block w-full animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
+              style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
             >
               <Card
                 rating={data.rating}
@@ -136,7 +137,7 @@ export default function ReviewsClient({ initialReviews }: ReviewsClientProps) {
             </Link>
           ))
         ) : (
-          <div className="col-span-full flex items-center justify-center py-12 text-center">
+          <div className="col-span-full flex items-center justify-center py-12 text-center animate-in fade-in duration-500">
             No reviews found.
           </div>
         )}

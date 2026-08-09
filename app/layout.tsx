@@ -26,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: themeInitScript below intentionally mutates
+    // this element's class before hydration (dark-mode-before-first-paint),
+    // so server and client legitimately disagree on className here.
+    <html lang="en" suppressHydrationWarning>
       <body className="font-mono min-h-screen flex flex-col bg-background text-foreground transition-colors">
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <a

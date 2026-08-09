@@ -3,6 +3,7 @@
 import { useState, ReactNode } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { HoverGlowProvider } from "./HoverGlowContext";
 
 export default function RootLayoutClient({
   children,
@@ -25,12 +26,12 @@ export default function RootLayoutClient({
   };
 
   return (
-    <>
-      <Header />
+    <HoverGlowProvider>
+      <Header toggleDark={toggleDark} isDark={isDark} />
       <main id="main-content" className="flex-1 w-full">
         {children}
       </main>
       <Footer toggleDark={toggleDark} isDark={isDark} />
-    </>
+    </HoverGlowProvider>
   );
 }

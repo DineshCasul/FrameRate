@@ -1,0 +1,113 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import type { Review } from "@/types";
+
+const PAGE_SIZE = 10;
+
+type Props = {
+  reviews: Review[];
+};
+
+export default function AdminReviewsList({ reviews }: Props) {
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return reviews;
+    return reviews.filter((r) => r.title.toLowerCase().includes(q));
+  }, [reviews, query]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const pageItems = filtered.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+
+  function handleQueryChange(next: string) {
+    setQuery(next);
+    setPage(0);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h2 className="text-lg sm:text-2xl font-bold">Reviews</h2>
+        <input
+          value={query}
+          onChange={(e) => handleQueryChange(e.target.value)}
+          placeholder="Search by title…"
+          className="border rounded px-3 py-2 bg-transparent text-sm w-48 sm:w-64"
+        />
+      </div>
+
+      {pageItems.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No reviews match &quot;{query}&quot;.</p>
+      ) : (
+        <div className="space-y-3 sm:space-y-4">
+          {pageItems.map((review, i) => (
+            <div
+              key={review.id}
+              className="border rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 hover:bg-muted transition-colors animate-in fade-in slide-in-from-bottom-2 duration-400 fill-mode-both"
+              style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
+            >
+              <Link
+                href={`/admin/reviews/${review.slug || review.id}/edit`}
+                className="flex-1 p-3 sm:p-4"
+              >
+                <h3 className="font-semibold text-sm sm:text-base">{review.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {review.type} • Rating: {review.rating}/10
+                </p>
+              </Link>
+              <div className="flex items-center gap-3 px-3 sm:px-4 pb-3 sm:pb-0 sm:pl-0">
+                {review.status === "published" && (
+                  <Link
+                    href={`/reviews/${review.slug || review.id}`}
+                    target="_blank"
+                    className="text-xs sm:text-sm underline hover:no-underline whitespace-nowrap"
+                  >
+                    View Live ↗
+                  </Link>
+                )}
+                <span
+                  className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold whitespace-nowrap ${
+                    review.status === "published"
+                      ? "bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200"
+                      : "bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200"
+                  }`}
+                >
+                  {review.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {pageCount > 1 && (
+        <div className="flex items-center justify-between mt-4 text-sm">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={currentPage === 0}
+            className="border rounded px-3 py-1.5 hover:bg-muted transition disabled:opacity-50 cursor-pointer"
+          >
+            Prev
+          </button>
+          <span className="text-muted-foreground">
+            Page {currentPage + 1} of {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            disabled={currentPage >= pageCount - 1}
+            className="border rounded px-3 py-1.5 hover:bg-muted transition disabled:opacity-50 cursor-pointer"
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,5 +1,9 @@
+"use client";
+
+import type { CSSProperties } from "react";
 import { ReviewKind } from "@/types";
-import { parseContent, TYPE_COLOR_CLASSES } from "@/lib/utils";
+import { cn, parseContent, TYPE_COLOR_CLASSES } from "@/lib/utils";
+import { useHoverGlow } from "@/app/HoverGlowContext";
 import Tag from "../Tag";
 
 type Props = {
@@ -7,16 +11,24 @@ type Props = {
   rating: number;
   title: string;
   className?: string;
+  style?: CSSProperties;
   type: ReviewKind;
   backgroundUrl?: string;
 };
 
-const Card = ({ title, rating, description, type, backgroundUrl }: Props) => {
+const Card = ({ title, rating, description, type, backgroundUrl, className, style }: Props) => {
   const colors = TYPE_COLOR_CLASSES[type];
+  const { setHoverType } = useHoverGlow();
 
   return (
     <div
-      className={`border h-40 sm:h-48 cursor-pointer relative overflow-hidden group ${colors.hoverBg} transition ease-in-out p-3 sm:p-4 w-full`}
+      style={style}
+      onMouseEnter={() => setHoverType(type)}
+      onMouseLeave={() => setHoverType(null)}
+      className={cn(
+        `border h-40 sm:h-48 cursor-pointer relative overflow-hidden group ${colors.hoverBg} transition-all ease-in-out duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/40 p-3 sm:p-4 w-full`,
+        className,
+      )}
     >
       {backgroundUrl && (
         <div
