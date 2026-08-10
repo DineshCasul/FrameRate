@@ -3,14 +3,17 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Card from "@/app/components/Card";
+import DiscoverTile from "./DiscoverTile";
 import { distinctSorted, cardBlurb, TYPE_COLOR_CLASSES } from "@/lib/utils";
+import { genresForType, type DiscoverTileData } from "@/lib/discover";
 import type { Review, ReviewKind } from "@/types";
 
 type Props = {
   reviews: Review[];
+  trendingByType: Record<ReviewKind, DiscoverTileData[]>;
 };
 
-type Step = "type" | "vibe" | "rating" | "result";
+type Step = "type" | "genre" | "vibe" | "rating" | "result";
 
 const TYPE_LABELS: { type: ReviewKind; label: string; emoji: string }[] = [
   { type: "game", label: "Game", emoji: "🎮" },
@@ -19,10 +22,10 @@ const TYPE_LABELS: { type: ReviewKind; label: string; emoji: string }[] = [
 ];
 
 const RATING_OPTIONS = [
-  { label: "Any", value: 0 },
-  { label: "7+", value: 7 },
-  { label: "8+", value: 8 },
-  { label: "9+", value: 9 },
+  { label: "Surprise Me", value: 0, hint: "Any rating, just match the vibe" },
+  { label: "Solid", value: 7, hint: "7+ — reliably good" },
+  { label: "Great", value: 8, hint: "8+ — genuinely great" },
+  { label: "Must-Experience", value: 9, hint: "9+ — the best of the best" },
 ];
 
 type Result = {
@@ -54,16 +57,35 @@ function findPick(reviews: Review[], type: ReviewKind, vibe: string | null, minR
   return { pick: sorted[0] ?? null, runnersUp: sorted.slice(1, 3), notes };
 }
 
-export default function RecommendQuiz({ reviews }: Props) {
+export default function RecommendQuiz({ reviews, trendingByType }: Props) {
   const [step, setStep] = useState<Step>("type");
   const [type, setType] = useState<ReviewKind | null>(null);
+  const [genre, setGenre] = useState<string | null>(null);
   const [vibe, setVibe] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+
+  // Surprise-me sets result.pick.type without ever touching the `type`
+  // state, so the trending strip needs to fall back to the pick's own type.
+  const trendingType = result?.pick?.type ?? type;
+  const trendingPool = trendingType ? trendingByType[trendingType] : [];
+  // Genre only applies to the guided path (surprise-me never sets it) —
+  // narrows the external pool the same way vibe narrows your own reviews.
+  // Pool is already ordered by hype/popularity from the source fetch, so
+  // filtering preserves a reasonable "best first" order.
+  const trendingTiles = (genre ? trendingPool.filter((t) => t.genres.includes(genre)) : trendingPool).slice(
+    0,
+    6,
+  );
 
   const availableTypes = useMemo(
     () => TYPE_LABELS.filter((t) => reviews.some((r) => r.type === t.type)),
     [reviews],
   );
+
+  const genreOptions = useMemo(() => {
+    if (!type) return [];
+    return genresForType(trendingByType[type]);
+  }, [trendingByType, type]);
 
   const vibeOptions = useMemo(() => {
     if (!type) return [];
@@ -75,19 +97,25 @@ export default function RecommendQuiz({ reviews }: Props) {
   function reset() {
     setStep("type");
     setType(null);
+    setGenre(null);
     setVibe(null);
     setResult(null);
   }
 
   function pickType(t: ReviewKind) {
     setType(t);
-    setStep("vibe");
+    setStep(genresForType(trendingByType[t]).length > 0 ? "genre" : "vibe");
   }
 
   function surpriseMe() {
     const pick = reviews[Math.floor(Math.random() * reviews.length)];
     setResult({ pick, runnersUp: [], notes: ["Random pick from everything published."] });
     setStep("result");
+  }
+
+  function pickGenre(g: string | null) {
+    setGenre(g);
+    setStep("vibe");
   }
 
   function pickVibe(v: string | null) {
@@ -142,6 +170,38 @@ export default function RecommendQuiz({ reviews }: Props) {
         </div>
       )}
 
+      {step === "genre" && type && (
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300 fill-mode-both">
+          <h2 className="text-lg sm:text-xl font-bold mb-1">Any genre in mind?</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            This narrows what we show you from what&apos;s trending right now, not your pick below.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" onClick={() => pickGenre(null)} className={chipClass}>
+              Any
+            </button>
+            {genreOptions.map((g, i) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => pickGenre(g)}
+                className={`${chipClass} animate-in fade-in zoom-in-95 duration-300 fill-mode-both`}
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setStep("type")}
+            className="text-sm text-muted-foreground hover:underline mt-4"
+          >
+            &larr; Back
+          </button>
+        </div>
+      )}
+
       {step === "vibe" && type && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 fill-mode-both">
           <h2 className="text-lg sm:text-xl font-bold mb-1">What matches you?</h2>
@@ -166,7 +226,7 @@ export default function RecommendQuiz({ reviews }: Props) {
           </div>
           <button
             type="button"
-            onClick={() => setStep("type")}
+            onClick={() => setStep(genreOptions.length > 0 ? "genre" : "type")}
             className="text-sm text-muted-foreground hover:underline mt-4"
           >
             &larr; Back
@@ -177,16 +237,17 @@ export default function RecommendQuiz({ reviews }: Props) {
       {step === "rating" && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 fill-mode-both">
           <h2 className="text-lg sm:text-xl font-bold mb-4">How good does it need to be?</h2>
-          <div className="flex flex-wrap gap-3">
-            {RATING_OPTIONS.map(({ label, value }, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {RATING_OPTIONS.map(({ label, value, hint }, i) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => pickRating(value)}
-                className={`${chipClass} animate-in fade-in zoom-in-95 duration-300 fill-mode-both`}
+                className="text-left border rounded-lg p-4 hover:bg-muted hover:scale-[1.02] transition cursor-pointer animate-in fade-in zoom-in-95 duration-300 fill-mode-both"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                {label}
+                <div className="font-semibold text-sm sm:text-base">{label}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">{hint}</div>
               </button>
             ))}
           </div>
@@ -254,6 +315,26 @@ export default function RecommendQuiz({ reviews }: Props) {
             </>
           ) : (
             <p className="text-muted-foreground mb-6">No match found — try different answers.</p>
+          )}
+          {trendingTiles.length > 0 && (
+            <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-500 fill-mode-both">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                Trending {genre ? `${genre} ` : ""}
+                {trendingType} right now — not reviewed here yet
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                {trendingTiles.map((tile) => (
+                  <DiscoverTile
+                    key={tile.id}
+                    title={tile.title}
+                    type={tile.type}
+                    imageUrl={tile.imageUrl}
+                    releaseLabel={tile.releaseLabel}
+                    genres={tile.genres}
+                  />
+                ))}
+              </div>
+            </div>
           )}
           <button
             type="button"

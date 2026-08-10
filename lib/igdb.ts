@@ -11,6 +11,7 @@ export type IgdbGame = {
   coverUrl?: string;
   firstReleaseDate?: number; // unix seconds
   hypes?: number;
+  genres: string[];
 };
 
 type IgdbToken = { token: string; expiresAt: number };
@@ -42,14 +43,18 @@ type RawIgdbGame = {
   cover?: { url: string };
   first_release_date?: number;
   hypes?: number;
+  genres?: { name: string }[];
 };
 
 const GAMES_TTL_MS = 6 * 60 * 60 * 1000; // 6h — plenty fresh for a "what's hot" feed, keeps us well under the 4 req/s limit
 let gamesCache: { data: IgdbGame[]; expiresAt: number } | undefined;
 
 // Most-anticipated unreleased games, sorted by community "hype" — IGDB's
-// own signal for upcoming titles people are excited about.
-export async function getAnticipatedGames(limit = 12): Promise<IgdbGame[]> {
+// own signal for upcoming titles people are excited about. Fetches a wider
+// pool than any single view needs (the quiz filters this further by genre)
+// so there's still plenty left after genre-narrowing and after excluding
+// anything already reviewed here.
+export async function getAnticipatedGames(limit = 30): Promise<IgdbGame[]> {
   if (gamesCache && gamesCache.expiresAt > Date.now()) return gamesCache.data;
 
   const clientId = process.env.IGDB_CLIENT_ID;
@@ -57,7 +62,7 @@ export async function getAnticipatedGames(limit = 12): Promise<IgdbGame[]> {
   if (!clientId || !token) return [];
 
   const now = Math.floor(Date.now() / 1000);
-  const body = `fields name,slug,cover.url,first_release_date,hypes;
+  const body = `fields name,slug,cover.url,first_release_date,hypes,genres.name;
     where first_release_date > ${now} & hypes != null;
     sort hypes desc;
     limit ${limit};`;
@@ -82,6 +87,7 @@ export async function getAnticipatedGames(limit = 12): Promise<IgdbGame[]> {
     coverUrl: g.cover?.url ? `https:${g.cover.url.replace("t_thumb", "t_cover_big")}` : undefined,
     firstReleaseDate: g.first_release_date,
     hypes: g.hypes,
+    genres: (g.genres ?? []).map((genre) => genre.name),
   }));
 
   gamesCache = { data: games, expiresAt: Date.now() + GAMES_TTL_MS };

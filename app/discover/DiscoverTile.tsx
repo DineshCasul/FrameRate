@@ -8,13 +8,14 @@ type Props = {
   type: ReviewKind;
   imageUrl?: string;
   releaseLabel?: string;
+  genres?: string[];
 };
 
 // A tile for a title pulled from IGDB/TMDb that hasn't been reviewed here
 // yet — visually related to Card (same type-color spine + swatch fallback)
 // but distinct since there's no rating/slug/blurb to show, just a jumping
 // off point into a pre-filled draft review.
-export default function DiscoverTile({ title, type, imageUrl, releaseLabel }: Props) {
+export default function DiscoverTile({ title, type, imageUrl, releaseLabel, genres = [] }: Props) {
   const colors = TYPE_COLOR_CLASSES[type];
 
   return (
@@ -44,6 +45,11 @@ export default function DiscoverTile({ title, type, imageUrl, releaseLabel }: Pr
         <div className={`text-[10px] font-semibold uppercase tracking-wider ${colors.text}`}>{type}</div>
         <div className="font-bold text-xs sm:text-sm line-clamp-2">{title}</div>
         {releaseLabel && <div className="text-[10px] sm:text-xs text-muted-foreground">{releaseLabel}</div>}
+        {genres.length > 0 && (
+          <div className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1">
+            {genres.slice(0, 2).join(", ")}
+          </div>
+        )}
         <Link
           href={`/admin/reviews/new?title=${encodeURIComponent(title)}&type=${type}`}
           className="mt-auto pt-2 text-[10px] sm:text-xs underline hover:no-underline"

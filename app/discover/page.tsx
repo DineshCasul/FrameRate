@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Review } from "@/types";
 import { getPublishedReviews } from "@/lib/getReviews";
+import { loadTrendingByType } from "@/lib/discover";
 import Card from "../components/Card";
 import Reveal from "../components/Reveal";
 import RecommendQuiz from "./RecommendQuiz";
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 
 export default async function DiscoverPage() {
   const reviews = await getPublishedReviews();
+  const trendingByType = await loadTrendingByType(reviews);
 
   const highestRatedByType = reviews.reduce((acc: Record<string, Review>, review: Review) => {
       if (!acc[review.type] || acc[review.type].rating < review.rating) {
@@ -35,7 +37,7 @@ export default async function DiscoverPage() {
         </p>
 
         <div className="mb-12 sm:mb-16">
-          <RecommendQuiz reviews={reviews} />
+          <RecommendQuiz reviews={reviews} trendingByType={trendingByType} />
         </div>
 
         <div>
@@ -58,7 +60,7 @@ export default async function DiscoverPage() {
           </div>
         </div>
 
-        <TrendingSection />
+        <TrendingSection trendingByType={trendingByType} />
       </div>
     </div>
   );
