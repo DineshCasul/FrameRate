@@ -19,12 +19,12 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen px-4 sm:px-6 py-6 sm:py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-2 duration-500 fill-mode-both">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-2 duration-500 fill-mode-both">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Admin Panel</h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between sm:justify-end gap-4">
             <Link
               href="/admin/reviews/new"
-              className="border rounded px-3 py-2 text-sm hover:bg-muted transition"
+              className="border rounded px-3 py-2 text-sm font-semibold hover:bg-muted hover:scale-105 transition whitespace-nowrap"
             >
               + New Review
             </Link>
@@ -32,22 +32,30 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-          <div className="bg-muted p-4 sm:p-6 rounded animate-in fade-in slide-in-from-bottom-2 duration-500 delay-75 fill-mode-both">
-            <h2 className="text-sm sm:text-lg font-semibold mb-2">Total Reviews</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="border bg-muted/40 rounded p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/40 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-75 fill-mode-both">
+            <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Total Reviews
+            </h2>
             <p className="text-3xl sm:text-4xl font-bold">{reviews.length}</p>
           </div>
-          <div className="bg-green-100 dark:bg-green-900 p-4 sm:p-6 rounded animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150 fill-mode-both">
-            <h2 className="text-sm sm:text-lg font-semibold mb-2">Published</h2>
-            <p className="text-3xl sm:text-4xl font-bold text-green-600 dark:text-green-400">
-              {publishedCount}
-            </p>
+          <div
+            style={{ borderLeftColor: "var(--status-good)", borderLeftWidth: 4 }}
+            className="border bg-muted/40 rounded p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/40 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150 fill-mode-both"
+          >
+            <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Published
+            </h2>
+            <p className="text-3xl sm:text-4xl font-bold text-status-good">{publishedCount}</p>
           </div>
-          <div className="bg-yellow-100 dark:bg-yellow-900 p-4 sm:p-6 rounded animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200 fill-mode-both">
-            <h2 className="text-sm sm:text-lg font-semibold mb-2">Drafts</h2>
-            <p className="text-3xl sm:text-4xl font-bold text-yellow-600 dark:text-yellow-400">
-              {draftCount}
-            </p>
+          <div
+            style={{ borderLeftColor: "var(--status-warn)", borderLeftWidth: 4 }}
+            className="border bg-muted/40 rounded p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/40 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200 fill-mode-both"
+          >
+            <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Drafts
+            </h2>
+            <p className="text-3xl sm:text-4xl font-bold text-status-warn">{draftCount}</p>
           </div>
         </div>
 

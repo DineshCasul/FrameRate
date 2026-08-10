@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { TYPE_COLOR_CLASSES } from "@/lib/utils";
 import type { Review } from "@/types";
 
 const PAGE_SIZE = 10;
@@ -48,16 +49,23 @@ export default function AdminReviewsList({ reviews }: Props) {
           {pageItems.map((review, i) => (
             <div
               key={review.id}
-              className="border rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 hover:bg-muted transition-colors animate-in fade-in slide-in-from-bottom-2 duration-400 fill-mode-both"
-              style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
+              style={{
+                borderLeftColor: TYPE_COLOR_CLASSES[review.type].cssVar,
+                borderLeftWidth: 3,
+                animationDelay: `${Math.min(i * 30, 300)}ms`,
+              }}
+              className="border rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 transition-colors hover:bg-muted animate-in fade-in slide-in-from-bottom-2 duration-400 fill-mode-both"
             >
               <Link
                 href={`/admin/reviews/${review.slug || review.id}/edit`}
                 className="flex-1 p-3 sm:p-4"
               >
                 <h3 className="font-semibold text-sm sm:text-base">{review.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  {review.type} • Rating: {review.rating}/10
+                <p className={`text-xs sm:text-sm font-semibold uppercase tracking-wide ${TYPE_COLOR_CLASSES[review.type].text}`}>
+                  {review.type}
+                  <span className="text-muted-foreground font-normal normal-case tracking-normal">
+                    {" "}• Rating: {review.rating}/10
+                  </span>
                 </p>
               </Link>
               <div className="flex items-center gap-3 px-3 sm:px-4 pb-3 sm:pb-0 sm:pl-0">
@@ -71,10 +79,8 @@ export default function AdminReviewsList({ reviews }: Props) {
                   </Link>
                 )}
                 <span
-                  className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold whitespace-nowrap ${
-                    review.status === "published"
-                      ? "bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200"
-                      : "bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200"
+                  className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap border border-current ${
+                    review.status === "published" ? "text-status-good" : "text-status-warn"
                   }`}
                 >
                   {review.status}

@@ -53,6 +53,7 @@
      type accents above, not reused hues (see Type Color Palette note) */
   --status-good: #238055;
   --status-bad: #c94a44;
+  --status-warn: #a6741b;
 }
 
 body {
@@ -105,6 +106,7 @@ body {
   --color-type-series: var(--type-series);
   --color-status-good: var(--status-good);
   --color-status-bad: var(--status-bad);
+  --color-status-warn: var(--status-warn);
 }
 
 .dark {
@@ -146,6 +148,7 @@ body {
 
   --status-good: #2fa06c;
   --status-bad: #dd6b65;
+  --status-warn: #d9a441;
 }
 
 @layer base {
