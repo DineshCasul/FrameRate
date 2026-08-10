@@ -22,10 +22,26 @@ type Props = {
 export default function Reveal({ children, className, delay = 0, offset = 16 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  // True for anything already on screen at mount (typically the first row
+  // of cards) — those skip the CSS transition entirely and just appear,
+  // rather than relying on a transition that occasionally never finishes
+  // playing (leaving the element stuck part-faded) when it's triggered
+  // essentially the instant the observer starts watching it.
+  const [instant, setInstant] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const alreadyInView = rect.top < window.innerHeight && rect.bottom > 0;
+    if (alreadyInView) {
+      const timer = setTimeout(() => {
+        setInstant(true);
+        setVisible(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -49,7 +65,11 @@ export default function Reveal({ children, className, delay = 0, offset = 16 }: 
     <div
       ref={ref}
       style={style}
-      className={cn("transition-all duration-700 ease-out", visible ? "opacity-100" : "opacity-0", className)}
+      className={cn(
+        instant ? "" : "transition-all duration-700 ease-out",
+        visible ? "opacity-100" : "opacity-0",
+        className,
+      )}
     >
       {children}
     </div>

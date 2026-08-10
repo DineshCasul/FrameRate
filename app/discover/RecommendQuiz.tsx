@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import Card from "@/app/components/Card";
 import DiscoverTile from "./DiscoverTile";
-import { distinctSorted, cardBlurb, TYPE_COLOR_CLASSES } from "@/lib/utils";
+import { distinctSorted, cardBlurb, RECOMMENDATION_BADGES, TYPE_COLOR_CLASSES } from "@/lib/utils";
 import { genresForType, type DiscoverTileData } from "@/lib/discover";
 import type { Review, ReviewKind } from "@/types";
 
@@ -13,19 +13,12 @@ type Props = {
   trendingByType: Record<ReviewKind, DiscoverTileData[]>;
 };
 
-type Step = "type" | "genre" | "vibe" | "rating" | "result";
+type Step = "type" | "genre" | "vibe" | "badge" | "result";
 
-const TYPE_LABELS: { type: ReviewKind; label: string; emoji: string }[] = [
-  { type: "game", label: "Game", emoji: "🎮" },
-  { type: "movie", label: "Movie", emoji: "🎬" },
-  { type: "series", label: "Series", emoji: "📺" },
-];
-
-const RATING_OPTIONS = [
-  { label: "Surprise Me", value: 0, hint: "Any rating, just match the vibe" },
-  { label: "Solid", value: 7, hint: "7+ — reliably good" },
-  { label: "Great", value: 8, hint: "8+ — genuinely great" },
-  { label: "Must-Experience", value: 9, hint: "9+ — the best of the best" },
+const TYPE_LABELS: { type: ReviewKind; label: string }[] = [
+  { type: "game", label: "Game" },
+  { type: "movie", label: "Movie" },
+  { type: "series", label: "Series" },
 ];
 
 type Result = {
@@ -34,18 +27,18 @@ type Result = {
   notes: string[];
 };
 
-function findPick(reviews: Review[], type: ReviewKind, vibe: string | null, minRating: number): Result {
+function findPick(reviews: Review[], type: ReviewKind, vibe: string | null, badge: string | null): Result {
   const pool = reviews.filter((r) => r.type === type);
   const notes: string[] = [];
 
   let candidates = pool;
   if (vibe) candidates = candidates.filter((r) => r.recommendedFor?.includes(vibe));
-  if (minRating) candidates = candidates.filter((r) => r.rating >= minRating);
+  if (badge) candidates = candidates.filter((r) => r.recommendationBadge === badge);
 
-  if (candidates.length === 0 && minRating) {
+  if (candidates.length === 0 && badge) {
     candidates = vibe ? pool.filter((r) => r.recommendedFor?.includes(vibe)) : pool;
     if (candidates.length > 0) {
-      notes.push(`Nothing rated ${minRating}+ matched exactly, so here's the best available instead.`);
+      notes.push(`Nothing tagged "${badge}" matched exactly, so here's the best available instead.`);
     }
   }
   if (candidates.length === 0 && vibe) {
@@ -120,12 +113,12 @@ export default function RecommendQuiz({ reviews, trendingByType }: Props) {
 
   function pickVibe(v: string | null) {
     setVibe(v);
-    setStep("rating");
+    setStep("badge");
   }
 
-  function pickRating(value: number) {
+  function pickBadge(b: string | null) {
     if (type) {
-      setResult(findPick(reviews, type, vibe, value));
+      setResult(findPick(reviews, type, vibe, b));
     }
     setStep("result");
   }
@@ -147,7 +140,7 @@ export default function RecommendQuiz({ reviews, trendingByType }: Props) {
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 fill-mode-both">
           <h2 className="text-lg sm:text-xl font-bold mb-4">What are you in the mood for?</h2>
           <div className="flex flex-wrap gap-3">
-            {availableTypes.map(({ type: t, label, emoji }, i) => (
+            {availableTypes.map(({ type: t, label }, i) => (
               <button
                 key={t}
                 type="button"
@@ -155,7 +148,7 @@ export default function RecommendQuiz({ reviews, trendingByType }: Props) {
                 className={`${chipClass} animate-in fade-in zoom-in-95 duration-300 fill-mode-both`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                {emoji} {label}
+                {label}
               </button>
             ))}
             <button
@@ -164,7 +157,7 @@ export default function RecommendQuiz({ reviews, trendingByType }: Props) {
               className={`${chipClass} animate-in fade-in zoom-in-95 duration-300 fill-mode-both`}
               style={{ animationDelay: `${availableTypes.length * 60}ms` }}
             >
-              🎲 Just surprise me
+              Just surprise me
             </button>
           </div>
         </div>
@@ -234,20 +227,23 @@ export default function RecommendQuiz({ reviews, trendingByType }: Props) {
         </div>
       )}
 
-      {step === "rating" && (
+      {step === "badge" && type && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 fill-mode-both">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">How good does it need to be?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {RATING_OPTIONS.map(({ label, value, hint }, i) => (
+          <h2 className="text-lg sm:text-xl font-bold mb-1">What kind of pick are you after?</h2>
+          <p className="text-sm text-muted-foreground mb-4">Skip if you don&apos;t have a preference.</p>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" onClick={() => pickBadge(null)} className={chipClass}>
+              Any
+            </button>
+            {RECOMMENDATION_BADGES[type].map((b, i) => (
               <button
-                key={label}
+                key={b}
                 type="button"
-                onClick={() => pickRating(value)}
-                className="text-left border rounded-lg p-4 hover:bg-muted hover:scale-[1.02] transition cursor-pointer animate-in fade-in zoom-in-95 duration-300 fill-mode-both"
-                style={{ animationDelay: `${i * 60}ms` }}
+                onClick={() => pickBadge(b)}
+                className={`${chipClass} animate-in fade-in zoom-in-95 duration-300 fill-mode-both`}
+                style={{ animationDelay: `${i * 40}ms` }}
               >
-                <div className="font-semibold text-sm sm:text-base">{label}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">{hint}</div>
+                {b}
               </button>
             ))}
           </div>
