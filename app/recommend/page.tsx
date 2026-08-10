@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Review } from "@/types";
 import { getPublishedReviews } from "@/lib/getReviews";
 import Card from "../components/Card";
+import Reveal from "../components/Reveal";
 import RecommendQuiz from "./RecommendQuiz";
 import Link from "next/link";
 import { cardBlurb } from "@/lib/utils";
@@ -39,21 +40,19 @@ export default async function RecommendPage() {
         <div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6">Best By Category</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-            {Object.values(highestRatedByType).map((review) => (
-              <Link
-                href={`/reviews/${review.slug || review.id}`}
-                key={review.id}
-                className="block w-full"
-              >
-                <Card
-                  rating={review.rating}
-                  blurb={cardBlurb(review)}
-                  title={review.title}
-                  type={review.type}
-                  backgroundUrl={review.backgroundUrl}
-                  recommendationBadge={review.recommendationBadge}
-                />
-              </Link>
+            {Object.values(highestRatedByType).map((review, i) => (
+              <Reveal key={review.id} delay={i * 80}>
+                <Link href={`/reviews/${review.slug || review.id}`} className="block w-full">
+                  <Card
+                    rating={review.rating}
+                    blurb={cardBlurb(review)}
+                    title={review.title}
+                    type={review.type}
+                    backgroundUrl={review.backgroundUrl}
+                    recommendationBadge={review.recommendationBadge}
+                  />
+                </Link>
+              </Reveal>
             ))}
           </div>
         </div>

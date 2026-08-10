@@ -198,8 +198,12 @@ export default function HomeHero({ tagline, featuredReviews }: Props) {
           className={`mt-12 transition-opacity duration-500 ${revealed ? "opacity-100" : "opacity-0"}`}
           style={revealed ? { transitionDelay: `${600 + featuredReviews.length * 100 + 200}ms` } : undefined}
         >
-          <Link className="hover:underline" href="/reviews">
-            -View All-
+          <Link
+            href="/reviews"
+            className="inline-flex items-center gap-2 border rounded px-4 py-2 text-sm sm:text-base font-semibold hover:bg-muted hover:scale-105 transition"
+          >
+            View All Reviews
+            <span aria-hidden="true">&rarr;</span>
           </Link>
         </div>
       </div>

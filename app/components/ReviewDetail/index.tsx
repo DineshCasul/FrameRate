@@ -1,5 +1,6 @@
 import { parseContent, getYouTubeId, TYPE_COLOR_CLASSES } from "@/lib/utils";
 import { YouTubeFacade } from "@/app/components/YouTubeFacade";
+import Reveal from "@/app/components/Reveal";
 import Link from "next/link";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import type { Review } from "@/types";
@@ -69,7 +70,7 @@ const ReviewDetailContent = ({ review, linkTags = true }: Props) => {
         if (!hasAspectRatings && !review.playtime) return null;
 
         return (
-          <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200 fill-mode-both">
+          <Reveal className="mb-6">
             {hasAspectRatings && (
               <h3 className="text-lg sm:text-xl font-bold mb-3">
                 Aspect Ratings
@@ -106,11 +107,11 @@ const ReviewDetailContent = ({ review, linkTags = true }: Props) => {
                 )}
               </div>
             )}
-          </div>
+          </Reveal>
         );
       })()}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300 fill-mode-both">
+      <Reveal className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" delay={80}>
         {review.pros && review.pros.length > 0 && (
           <div>
             <h3 className="text-lg sm:text-xl font-bold mb-3 text-status-good">
@@ -154,18 +155,18 @@ const ReviewDetailContent = ({ review, linkTags = true }: Props) => {
             </ul>
           </div>
         )}
-      </div>
+      </Reveal>
 
       {youtubeId && (
-        <div className="flex justify-center mb-6 -mx-4 sm:-mx-8 px-4 sm:px-8">
+        <Reveal className="flex justify-center mb-6 -mx-4 sm:-mx-8 px-4 sm:px-8">
           <div className="w-full max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-4xl aspect-video">
             <YouTubeFacade videoId={youtubeId} title={`${review.title} Trailer`} />
           </div>
-        </div>
+        </Reveal>
       )}
 
       {/* The full write-up — the argument behind the score/verdict above */}
-      <div className="border-t pt-6 animate-in fade-in duration-700 delay-300 fill-mode-both">
+      <Reveal className="border-t pt-6">
         {review.summary && (
           <p className="italic text-muted-foreground mb-4 text-sm sm:text-base">
             {review.summary}
@@ -176,14 +177,14 @@ const ReviewDetailContent = ({ review, linkTags = true }: Props) => {
             {para}
           </p>
         ))}
-      </div>
+      </Reveal>
 
       {/* .length check, not just truthy — the admin form always sends
           platform/recommendedFor as arrays (possibly empty []), never
           undefined, and an empty array is still truthy in JS. */}
       {((review.platform && review.platform.length > 0) ||
         (review.recommendedFor && review.recommendedFor.length > 0)) && (
-        <div className="bg-muted p-3 sm:p-4 rounded mb-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base animate-in fade-in duration-500 delay-500 fill-mode-both">
+        <Reveal className="bg-muted p-3 sm:p-4 rounded mb-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
           {review.platform && review.platform.length > 0 && (
             <div>
               <h4 className="font-bold mb-1">Platforms</h4>
@@ -196,7 +197,7 @@ const ReviewDetailContent = ({ review, linkTags = true }: Props) => {
               <p>{review.recommendedFor.join(", ")}</p>
             </div>
           )}
-        </div>
+        </Reveal>
       )}
     </div>
   );

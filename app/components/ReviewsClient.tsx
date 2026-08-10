@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import Card from "./Card";
+import Reveal from "./Reveal";
 import { FilterReviews } from "./FilterReviews";
 import { SortReviews } from "./SortReviews";
 import { cardBlurb } from "@/lib/utils";
@@ -122,21 +123,18 @@ export default function ReviewsClient({ initialReviews }: ReviewsClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {filteredData.length > 0 ? (
           filteredData.map((data, i) => (
-            <Link
-              href={`/reviews/${data.slug || data.id}`}
-              key={data.id}
-              className="block w-full animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-              style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
-            >
-              <Card
-                rating={data.rating}
-                blurb={cardBlurb(data)}
-                title={data.title}
-                type={data.type}
-                backgroundUrl={data.backgroundUrl}
-                recommendationBadge={data.recommendationBadge}
-              />
-            </Link>
+            <Reveal key={data.id} delay={Math.min((i % 6) * 60, 300)}>
+              <Link href={`/reviews/${data.slug || data.id}`} className="block w-full">
+                <Card
+                  rating={data.rating}
+                  blurb={cardBlurb(data)}
+                  title={data.title}
+                  type={data.type}
+                  backgroundUrl={data.backgroundUrl}
+                  recommendationBadge={data.recommendationBadge}
+                />
+              </Link>
+            </Reveal>
           ))
         ) : (
           <div className="col-span-full flex items-center justify-center py-12 text-center animate-in fade-in duration-500">
