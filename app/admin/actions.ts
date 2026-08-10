@@ -90,7 +90,7 @@ export async function saveReview(
   revalidatePath("/admin");
   revalidatePath("/reviews");
   revalidatePath("/");
-  revalidatePath("/recommend");
+  revalidatePath("/discover");
   revalidatePath(`/reviews/${slug}`);
 
   redirect("/admin");
@@ -149,7 +149,7 @@ export async function deleteReview(formData: FormData): Promise<{ error?: string
   revalidatePath("/admin");
   revalidatePath("/reviews");
   revalidatePath("/");
-  revalidatePath("/recommend");
+  revalidatePath("/discover");
   if (slug) revalidatePath(`/reviews/${slug}`);
 
   redirect("/admin");

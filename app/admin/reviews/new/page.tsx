@@ -3,6 +3,7 @@ import BreadCrumbs from "@/app/components/BreadCrumbs";
 import ReviewForm from "@/app/admin/ReviewForm";
 import { getReviews } from "@/lib/getReviews";
 import { knownReviewValues } from "@/lib/utils";
+import type { ReviewKind } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,19 @@ export const metadata: Metadata = {
   title: "New Review | Admin | FrameRate",
 };
 
-export default async function NewReviewPage() {
+const REVIEW_KINDS: ReviewKind[] = ["movie", "game", "series"];
+function isReviewKind(value: string): value is ReviewKind {
+  return (REVIEW_KINDS as string[]).includes(value);
+}
+
+type PageProps = {
+  // Populated by the Discover page's "+ Review this" links (title/type of
+  // an IGDB/TMDb title that doesn't have a FrameRate review yet).
+  searchParams: Promise<{ title?: string; type?: string }>;
+};
+
+export default async function NewReviewPage({ searchParams }: PageProps) {
+  const { title, type } = await searchParams;
   const reviews = await getReviews();
   const { tags, platforms, recommendedFor } = knownReviewValues(reviews);
 
@@ -25,6 +38,8 @@ export default async function NewReviewPage() {
           availableTags={tags}
           availablePlatforms={platforms}
           availableRecommendedFor={recommendedFor}
+          defaultTitle={title}
+          defaultType={type && isReviewKind(type) ? type : undefined}
         />
       </div>
     </div>

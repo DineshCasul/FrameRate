@@ -16,6 +16,10 @@ type Props = {
   availableTags?: string[];
   availablePlatforms?: string[];
   availableRecommendedFor?: string[];
+  // Prefill for a brand-new review (e.g. from the Discover page's
+  // "+ Review this" links) — ignored once initialReview is set (editing).
+  defaultTitle?: string;
+  defaultType?: ReviewKind;
 };
 
 type Values = {
@@ -40,15 +44,15 @@ type Values = {
   recommendationBadge: string;
 };
 
-function toValues(review?: Review): Values {
+function toValues(review?: Review, defaults?: { title?: string; type?: ReviewKind }): Values {
   const aspects: Record<string, string> = {};
   for (const [key, value] of Object.entries(review?.aspectRatings ?? {})) {
     if (value !== undefined) aspects[key] = String(value);
   }
   return {
-    title: review?.title ?? "",
+    title: review?.title ?? defaults?.title ?? "",
     slug: review?.slug ?? "",
-    type: review?.type ?? "movie",
+    type: review?.type ?? defaults?.type ?? "movie",
     status: review?.status ?? "draft",
     rating: review?.rating !== undefined ? String(review.rating) : "",
     aspects,
@@ -98,8 +102,12 @@ export default function ReviewForm({
   availableTags = [],
   availablePlatforms = [],
   availableRecommendedFor = [],
+  defaultTitle,
+  defaultType,
 }: Props) {
-  const [values, setValues] = useState<Values>(() => toValues(initialReview));
+  const [values, setValues] = useState<Values>(() =>
+    toValues(initialReview, { title: defaultTitle, type: defaultType }),
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const initialState: SaveReviewState = { error: null };
   const [state, formAction, isPending] = useActionState(saveReview, initialState);

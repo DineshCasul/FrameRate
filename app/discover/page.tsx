@@ -4,18 +4,19 @@ import { getPublishedReviews } from "@/lib/getReviews";
 import Card from "../components/Card";
 import Reveal from "../components/Reveal";
 import RecommendQuiz from "./RecommendQuiz";
+import TrendingSection from "./TrendingSection";
 import Link from "next/link";
 import { cardBlurb } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Recommendations | FrameRate",
+  title: "Discover | FrameRate",
   description:
-    "Get personalized recommendations for games, movies, and TV series based on FrameRate reviews.",
+    "Get personalized recommendations from FrameRate reviews, plus what's trending and new in games, movies, and TV.",
 };
 
-export default async function RecommendPage() {
+export default async function DiscoverPage() {
   const reviews = await getPublishedReviews();
 
   const highestRatedByType = reviews.reduce((acc: Record<string, Review>, review: Review) => {
@@ -28,9 +29,9 @@ export default async function RecommendPage() {
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Recommend Me</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Discover</h1>
         <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-8 sm:mb-12">
-          Answer a couple of questions, get one pick tailored to you.
+          Answer a couple of questions for a pick tailored to you, or see what&apos;s trending and new.
         </p>
 
         <div className="mb-12 sm:mb-16">
@@ -56,6 +57,8 @@ export default async function RecommendPage() {
             ))}
           </div>
         </div>
+
+        <TrendingSection />
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ const Header = ({ toggleDark, isDark }: Props) => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/reviews", label: "Reviews" },
-    { href: "/recommend", label: "Recommend Me" },
+    { href: "/discover", label: "Discover" },
   ];
 
   // Same quick filters as the homepage hero — only surfaced in the mobile
