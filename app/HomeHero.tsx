@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Card from "./components/Card";
 import Logo from "./components/Logo";
-import { TYPE_QUICK_LINKS } from "@/lib/utils";
+import { TYPE_QUICK_LINKS, TYPE_COLOR_CLASSES, cardBlurb } from "@/lib/utils";
 import type { Review } from "@/types";
 
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&*";
@@ -160,14 +160,18 @@ export default function HomeHero({ tagline, featuredReviews }: Props) {
                   |
                 </span>
               )}
-              <Link href={link.href} className="hover:underline">
+              <Link href={link.href} className="relative group">
                 {link.label}
+                <span
+                  className={`absolute left-0 -bottom-0.5 h-[2px] w-0 group-hover:w-full transition-all duration-500 ${TYPE_COLOR_CLASSES[link.type].bg}`}
+                  aria-hidden="true"
+                ></span>
               </Link>
             </span>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           {featuredReviews.map((review, i) => (
             <Link
               href={`/reviews/${review.slug || review.id}`}
@@ -181,10 +185,11 @@ export default function HomeHero({ tagline, featuredReviews }: Props) {
             >
               <Card
                 rating={review.rating}
-                description={review.content}
+                blurb={cardBlurb(review)}
                 title={review.title}
                 type={review.type}
                 backgroundUrl={review.backgroundUrl}
+                recommendationBadge={review.recommendationBadge}
               />
             </Link>
           ))}

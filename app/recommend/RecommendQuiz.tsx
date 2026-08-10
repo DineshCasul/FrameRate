@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Card from "@/app/components/Card";
-import { distinctSorted, TYPE_COLOR_CLASSES } from "@/lib/utils";
+import { distinctSorted, cardBlurb, TYPE_COLOR_CLASSES } from "@/lib/utils";
 import type { Review, ReviewKind } from "@/types";
 
 type Props = {
@@ -212,14 +212,15 @@ export default function RecommendQuiz({ reviews }: Props) {
               ))}
               <Link
                 href={`/reviews/${result.pick.slug || result.pick.id}`}
-                className="block max-w-sm mb-6 animate-in fade-in zoom-in-95 duration-500 fill-mode-both"
+                className="block mb-6 animate-in fade-in zoom-in-95 duration-500 fill-mode-both"
               >
                 <Card
                   title={result.pick.title}
                   rating={result.pick.rating}
-                  description={result.pick.content}
+                  blurb={cardBlurb(result.pick)}
                   type={result.pick.type}
                   backgroundUrl={result.pick.backgroundUrl}
+                  recommendationBadge={result.pick.recommendationBadge}
                 />
               </Link>
               {result.pick.verdict && (
@@ -234,15 +235,16 @@ export default function RecommendQuiz({ reviews }: Props) {
                   <h3 className="text-sm font-semibold text-muted-foreground mb-3">
                     Also consider
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-3">
                     {result.runnersUp.map((r) => (
                       <Link href={`/reviews/${r.slug || r.id}`} key={r.id}>
                         <Card
                           title={r.title}
                           rating={r.rating}
-                          description={r.content}
+                          blurb={cardBlurb(r)}
                           type={r.type}
                           backgroundUrl={r.backgroundUrl}
+                          recommendationBadge={r.recommendationBadge}
                         />
                       </Link>
                     ))}

@@ -20,11 +20,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Type-filter shortcuts — shared by the homepage hero and the mobile
-// header menu so the two don't drift out of sync with each other.
-export const TYPE_QUICK_LINKS: { href: string; label: string }[] = [
-  { href: "/reviews?type=game", label: "Games" },
-  { href: "/reviews?type=movie", label: "Movies" },
-  { href: "/reviews?type=series", label: "Series" },
+// header menu so the two don't drift out of sync with each other. `type`
+// lets both hover the link's underline in that type's accent color.
+export const TYPE_QUICK_LINKS: { href: string; label: string; type: ReviewKind }[] = [
+  { href: "/reviews?type=game", label: "Games", type: "game" },
+  { href: "/reviews?type=movie", label: "Movies", type: "movie" },
+  { href: "/reviews?type=series", label: "Series", type: "series" },
 ];
 
 // Single source of truth for the movie/game/series accent colors (CSS vars
@@ -32,24 +33,34 @@ export const TYPE_QUICK_LINKS: { href: string; label: string }[] = [
 // interpolation, so this is a lookup table rather than a template.
 export const TYPE_COLOR_CLASSES: Record<
   ReviewKind,
-  { bg: string; text: string; hoverBg: string }
+  { bg: string; text: string; hoverBg: string; cssVar: string }
 > = {
   movie: {
     bg: "bg-type-movie",
     text: "text-type-movie",
     hoverBg: "hover:bg-type-movie/15",
+    cssVar: "var(--type-movie)",
   },
   game: {
     bg: "bg-type-game",
     text: "text-type-game",
     hoverBg: "hover:bg-type-game/15",
+    cssVar: "var(--type-game)",
   },
   series: {
     bg: "bg-type-series",
     text: "text-type-series",
     hoverBg: "hover:bg-type-series/15",
+    cssVar: "var(--type-series)",
   },
 };
+
+// The line shown on a Card — verdict is the punchiest one-liner, summary
+// (the TLDR) next, and the long-form content is only a last resort for rows
+// saved before verdict/summary were filled in.
+export function cardBlurb(review: Pick<Review, "verdict" | "summary" | "content">): string {
+  return review.verdict || review.summary || parseContent(review.content).join(" ");
+}
 
 // Supabase can return `content` as either a text[] column or a single
 // newline-delimited string depending on how a review was saved, so every
@@ -90,6 +101,34 @@ export const COMMON_PLATFORMS = [
   "Nintendo Switch",
   "Mobile",
 ] as const;
+
+// One-liner "should you bother" verdicts, distinct per type since a game's
+// day-1-buy calculus doesn't map onto a movie or series. Admin form limits
+// the picker to these — deliberately closed, not a TagPicker-style free-text
+// list, so the badge stays a quick recognizable signal across cards.
+export const RECOMMENDATION_BADGES: Record<ReviewKind, string[]> = {
+  game: [
+    "I'd Buy on Day 1",
+    "Wait for a Sale",
+    "Worth a Rental",
+    "Only for Genre Diehards",
+    "Not Worth Your Time",
+  ],
+  movie: [
+    "Catch It in Theaters",
+    "Perfect Rainy-Day Watch",
+    "One and Done",
+    "Only for the Fans",
+    "Skip It",
+  ],
+  series: [
+    "Cleared My Schedule for This",
+    "Solid Weekend Binge",
+    "One Season and Out",
+    "Only for the Fans",
+    "Skip It",
+  ],
+};
 
 export function distinctSorted(values: string[]): string[] {
   return Array.from(new Set(values.map((v) => v.trim()).filter(Boolean))).sort((a, b) =>

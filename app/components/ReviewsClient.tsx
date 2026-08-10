@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react";
 import Card from "./Card";
 import { FilterReviews } from "./FilterReviews";
 import { SortReviews } from "./SortReviews";
+import { cardBlurb } from "@/lib/utils";
 import type { Review, ReviewKind } from "@/types";
 
 interface ReviewsClientProps {
@@ -118,7 +119,7 @@ export default function ReviewsClient({ initialReviews }: ReviewsClientProps) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 justify-items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {filteredData.length > 0 ? (
           filteredData.map((data, i) => (
             <Link
@@ -129,10 +130,11 @@ export default function ReviewsClient({ initialReviews }: ReviewsClientProps) {
             >
               <Card
                 rating={data.rating}
-                description={data.content}
+                blurb={cardBlurb(data)}
                 title={data.title}
                 type={data.type}
                 backgroundUrl={data.backgroundUrl}
+                recommendationBadge={data.recommendationBadge}
               />
             </Link>
           ))

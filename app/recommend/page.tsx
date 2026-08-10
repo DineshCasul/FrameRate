@@ -4,6 +4,7 @@ import { getPublishedReviews } from "@/lib/getReviews";
 import Card from "../components/Card";
 import RecommendQuiz from "./RecommendQuiz";
 import Link from "next/link";
+import { cardBlurb } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export default async function RecommendPage() {
 
         <div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6">Best By Category</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {Object.values(highestRatedByType).map((review) => (
               <Link
                 href={`/reviews/${review.slug || review.id}`}
@@ -46,10 +47,11 @@ export default async function RecommendPage() {
               >
                 <Card
                   rating={review.rating}
-                  description={review.content}
+                  blurb={cardBlurb(review)}
                   title={review.title}
                   type={review.type}
                   backgroundUrl={review.backgroundUrl}
+                  recommendationBadge={review.recommendationBadge}
                 />
               </Link>
             ))}

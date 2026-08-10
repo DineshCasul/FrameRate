@@ -49,5 +49,10 @@ export type Review = {
 
   recommendedFor?: string[]; // "Souls fans", "Hardcore players"
 
+  // One predefined phrase from RECOMMENDATION_BADGES[type], shown as a
+  // small pill on the card — a quick "should you bother" verdict distinct
+  // from the numeric rating.
+  recommendationBadge?: string;
+
   status: "draft" | "published";
 };

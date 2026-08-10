@@ -8,7 +8,7 @@ import Card from "@/app/components/Card";
 import ReviewDetailContent from "@/app/components/ReviewDetail";
 import TagPicker from "./TagPicker";
 import ImageUploadField from "./ImageUploadField";
-import { aspectFieldsFor, linesToArray, slugify } from "@/lib/utils";
+import { aspectFieldsFor, linesToArray, slugify, cardBlurb, RECOMMENDATION_BADGES } from "@/lib/utils";
 import type { Review, ReviewKind } from "@/types";
 
 type Props = {
@@ -37,6 +37,7 @@ type Values = {
   platform: string[];
   recommendedFor: string[];
   playtime: string;
+  recommendationBadge: string;
 };
 
 function toValues(review?: Review): Values {
@@ -63,6 +64,7 @@ function toValues(review?: Review): Values {
     platform: review?.platform ?? [],
     recommendedFor: review?.recommendedFor ?? [],
     playtime: review?.playtime ?? "",
+    recommendationBadge: review?.recommendationBadge ?? "",
   };
 }
 
@@ -159,6 +161,7 @@ export default function ReviewForm({
       playtime: values.playtime || undefined,
       platform: values.platform,
       recommendedFor: values.recommendedFor,
+      recommendationBadge: values.recommendationBadge || undefined,
       status: values.status,
     };
   }, [values, aspects, computedSlug, initialReview]);
@@ -195,7 +198,20 @@ export default function ReviewForm({
                 className={inputClass}
                 name="type"
                 value={values.type}
-                onChange={(e) => set("type", e.target.value as ReviewKind)}
+                onChange={(e) => {
+                  const nextType = e.target.value as ReviewKind;
+                  setValues((v) => ({
+                    ...v,
+                    type: nextType,
+                    // Badge phrases are per-type — carrying one over across a
+                    // type switch would show e.g. "Worth a Rental" on a movie.
+                    recommendationBadge: RECOMMENDATION_BADGES[nextType].includes(
+                      v.recommendationBadge,
+                    )
+                      ? v.recommendationBadge
+                      : "",
+                  }));
+                }}
               >
                 <option value="movie">Movie</option>
                 <option value="game">Game</option>
@@ -216,6 +232,27 @@ export default function ReviewForm({
               </div>
             </Field>
           </div>
+          <Field label="Recommendation badge" hint="optional, shown as a small pill on the card">
+            <div className="flex flex-wrap gap-2">
+              {RECOMMENDATION_BADGES[values.type].map((badge) => {
+                const selected = values.recommendationBadge === badge;
+                return (
+                  <button
+                    key={badge}
+                    type="button"
+                    onClick={() => set("recommendationBadge", selected ? "" : badge)}
+                    aria-pressed={selected}
+                    className={`px-2.5 py-1 rounded-full text-xs sm:text-sm border transition ${
+                      selected ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"
+                    }`}
+                  >
+                    {badge}
+                  </button>
+                );
+              })}
+            </div>
+            <input type="hidden" name="recommendationBadge" value={values.recommendationBadge} />
+          </Field>
         </section>
 
         <section className={`${sectionClass} animate-in fade-in slide-in-from-bottom-2 duration-500 delay-75 fill-mode-both`}>
@@ -398,13 +435,14 @@ export default function ReviewForm({
       {/* Right: live preview, same components the site renders in production */}
       <div className="lg:sticky lg:top-4 animate-in fade-in duration-700 delay-150 fill-mode-both">
         <h2 className="text-lg sm:text-xl font-bold mb-4">Live Preview</h2>
-        <div className="mb-6 max-w-xs">
+        <div className="mb-6">
           <Card
             title={previewReview.title}
             rating={previewReview.rating}
-            description={previewReview.content}
+            blurb={cardBlurb(previewReview)}
             type={previewReview.type}
             backgroundUrl={previewReview.backgroundUrl}
+            recommendationBadge={previewReview.recommendationBadge}
           />
         </div>
         <div className="border rounded p-4 sm:p-6 max-h-[75vh] overflow-y-auto">

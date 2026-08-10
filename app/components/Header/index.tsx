@@ -4,7 +4,7 @@ import { HamburgerMenuIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useState, useRef, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import Logo from "@/app/components/Logo";
-import { TYPE_QUICK_LINKS } from "@/lib/utils";
+import { TYPE_QUICK_LINKS, TYPE_COLOR_CLASSES } from "@/lib/utils";
 
 type Props = {
   toggleDark: () => void;
@@ -137,10 +137,14 @@ const Header = ({ toggleDark, isDark }: Props) => {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground hover:scale-105"
+                className="relative w-fit group text-muted-foreground"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
+                <span
+                  className={`absolute left-0 -bottom-0.5 h-[2px] w-0 group-hover:w-full transition-all duration-500 ${TYPE_COLOR_CLASSES[link.type].bg}`}
+                  aria-hidden="true"
+                ></span>
               </Link>
             ))}
           </div>

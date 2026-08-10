@@ -7,6 +7,7 @@ import { getPublishedReviews } from "@/lib/getReviews";
 import { getReactionCounts } from "./actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { cardBlurb } from "@/lib/utils";
 import type { Metadata } from "next";
 import type { Review } from "@/types";
 
@@ -102,7 +103,7 @@ export default async function ReviewDetail({ params }: PageProps) {
         {relatedReviews.length > 0 && (
           <div className="mt-10">
             <h3 className="text-lg sm:text-xl font-bold mb-4">You Might Also Like</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 justify-items-center">
+            <div className="grid grid-cols-1 gap-3">
               {relatedReviews.map((r) => (
                 <Link
                   href={`/reviews/${r.slug || r.id}`}
@@ -111,10 +112,11 @@ export default async function ReviewDetail({ params }: PageProps) {
                 >
                   <Card
                     rating={r.rating}
-                    description={r.content}
+                    blurb={cardBlurb(r)}
                     title={r.title}
                     type={r.type}
                     backgroundUrl={r.backgroundUrl}
+                    recommendationBadge={r.recommendationBadge}
                   />
                 </Link>
               ))}

@@ -64,6 +64,7 @@ export async function saveReview(
     playtime: toText(formData.get("playtime")) ?? null,
     platform: linesToArray(formData.get("platform")),
     recommendedFor: linesToArray(formData.get("recommendedFor")),
+    recommendationBadge: toText(formData.get("recommendationBadge")) ?? null,
   };
 
   const row = toSnakeCase(fields);
